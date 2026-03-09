@@ -14,7 +14,7 @@ import {
 import { db } from '@/lib/firebase';
 import type { SelectionStep, StepSelection } from '@/store/useOrderStore';
 
-const WEBHOOK_RECIBO    = 'https://kitty.n8n.ipnet.cloud/webhook/disparo-recibo-maquiagem';
+const WEBHOOK_RECIBO = 'https://kitty.n8n.ipnet.cloud/webhook/disparo-recibo-maquiagem';
 const WEBHOOK_MAQUIADOR = 'https://kitty.n8n.ipnet.cloud/webhook/maquiador-trigger';
 
 export interface Order {
@@ -31,7 +31,8 @@ async function postWebhookRecibo(payload: object) {
   try {
     await fetch(WEBHOOK_RECIBO, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify(payload),
     });
   } catch (e) { console.warn('Webhook recibo failed:', e); }
@@ -41,7 +42,8 @@ async function postWebhookMaquiador(payload: object) {
   try {
     await fetch(WEBHOOK_MAQUIADOR, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify(payload),
     });
   } catch (e) { console.warn('Webhook maquiador failed:', e); }
