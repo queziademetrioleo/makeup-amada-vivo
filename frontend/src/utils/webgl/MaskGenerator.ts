@@ -53,22 +53,14 @@ function drawLipMask(
     ...[...lowerInner].reverse().slice(1, -1),
   ];
 
-  // R channel = full lip fill (halo + sharp passes)
+  // R channel = lip fill — sharp fill only, no blur outside boundary
   ctx.globalCompositeOperation = 'source-over';
-
-  ctx.filter = 'blur(3px)';
-  ctx.beginPath();
-  polyPath(ctx, outerPoly);
-  ctx.fillStyle = '#ff0000';
-  ctx.fill();
-  ctx.filter = 'none';
-
   ctx.beginPath();
   polyPath(ctx, outerPoly);
   ctx.fillStyle = '#ff0000';
   ctx.fill();
 
-  // Punch out the inner mouth opening so teeth are not colored
+  // Punch out inner mouth so teeth stay uncolored
   ctx.globalCompositeOperation = 'destination-out';
   ctx.beginPath();
   polyPath(ctx, innerPoly);
@@ -76,7 +68,17 @@ function drawLipMask(
   ctx.fill();
   ctx.globalCompositeOperation = 'source-over';
 
-  // G channel = gloss zone — narrow band on upper inner lip
+  // Soft edge: tiny blur pass at reduced alpha on top (stays within ~2px of boundary)
+  ctx.filter = 'blur(1px)';
+  ctx.globalAlpha = 0.4;
+  ctx.beginPath();
+  polyPath(ctx, outerPoly);
+  ctx.fillStyle = '#ff0000';
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.filter = 'none';
+
+  // G channel = gloss — narrow band on upper inner lip
   const cx = upperInner.reduce((s, [x]) => s + x, 0) / upperInner.length;
   const cy = upperInner.reduce((s, [, y]) => s + y, 0) / upperInner.length;
 
