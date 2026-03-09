@@ -63,22 +63,32 @@ function drawBrowMask(
 ) {
   ctx.clearRect(0, 0, w, h);
   const faceWidth = Math.abs(landmarks[454].x - landmarks[234].x) * w;
-  const thickness = faceWidth * 0.022;
+  // Thin stroke — ~1.4% of face width; blur softens the hard edge naturally
+  const strokeW = faceWidth * 0.014;
 
-  const leftPts  = groupToPixels(LANDMARK_GROUPS.leftBrow, landmarks, w, h);
-  const rightPts = groupToPixels(LANDMARK_GROUPS.rightBrow, landmarks, w, h);
+  // Sort by X so the stroke follows the arch left-to-right, not zigzag
+  const leftPts  = groupToPixels(LANDMARK_GROUPS.leftBrow, landmarks, w, h)
+                     .sort((a, b) => a[0] - b[0]);
+  const rightPts = groupToPixels(LANDMARK_GROUPS.rightBrow, landmarks, w, h)
+                     .sort((a, b) => a[0] - b[0]);
 
   ctx.globalCompositeOperation = 'source-over';
-  // Use stroke-based approach to avoid rectangular blur artifacts
-  ctx.lineWidth = thickness * 2.2;
+  ctx.lineWidth = strokeW;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
-  ctx.filter = 'blur(5px)';
+  ctx.filter = 'blur(2px)';
   ctx.strokeStyle = '#ff0000';
+
   for (const pts of [leftPts, rightPts]) {
     ctx.beginPath();
     ctx.moveTo(pts[0][0], pts[0][1]);
-    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    // Smooth arch via quadratic bezier midpoints
+    for (let i = 1; i < pts.length - 1; i++) {
+      const mx = (pts[i][0] + pts[i + 1][0]) / 2;
+      const my = (pts[i][1] + pts[i + 1][1]) / 2;
+      ctx.quadraticCurveTo(pts[i][0], pts[i][1], mx, my);
+    }
+    ctx.lineTo(pts[pts.length - 1][0], pts[pts.length - 1][1]);
     ctx.stroke();
   }
   ctx.filter = 'none';
