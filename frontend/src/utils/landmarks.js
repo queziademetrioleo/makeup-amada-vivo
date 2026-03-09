@@ -20,16 +20,16 @@ export const LANDMARK_GROUPS = {
     leftEye: [33, 7, 163, 144, 145, 153, 154, 155, 133, 246, 161, 160, 159, 158, 157, 173],
     // Right eye
     rightEye: [362, 382, 381, 380, 374, 373, 390, 249, 263, 466, 388, 387, 386, 385, 384, 398],
-    // Blush zones — lateral cheekbone landmarks (away from nose)
-    leftCheek: [116, 117, 118, 119, 120, 121, 126, 142, 36, 205, 187, 207, 206],
-    rightCheek: [345, 346, 347, 348, 349, 350, 355, 371, 266, 425, 411, 427, 426],
+    // Blush zones — outer cheekbone landmarks (pushed away from nose)
+    leftCheek: [123, 147, 213, 192, 205, 187],
+    rightCheek: [352, 376, 433, 416, 425, 411],
     // Contour zones
     leftContour: [234, 93, 132, 58, 172, 136, 150, 149, 176],
     rightContour: [454, 323, 361, 288, 397, 365, 379, 378, 400],
     noseSides: [48, 64, 102, 331, 294, 278],
-    // Under-eye (concealer) — lower eyelid half of each eye
-    leftUnderEye: [33, 7, 163, 144, 145, 153, 154, 155, 133],
-    rightUnderEye: [263, 249, 390, 373, 374, 380, 381, 382, 362],
+    // Under-eye (concealer) — ONLY the lower eyelid arc below each eye
+    leftUnderEye: [33, 144, 145, 153, 154, 155, 133],
+    rightUnderEye: [362, 373, 374, 380, 381, 382, 263],
 };
 // ── Conversion helpers ─────────────────────────────────────────────────────────
 export function toPixel(lm, width, height) {

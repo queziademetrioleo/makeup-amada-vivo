@@ -165,7 +165,7 @@ function drawAuxMask(ctx, landmarks, w, h) {
         const cy = pts.reduce((s, p) => s + p[1], 0) / pts.length;
         return pts.map(([x, y]) => [cx + (x - cx) * scale, cy + (y - cy) * scale]);
     };
-    ctx.filter = 'blur(8px)';
+    ctx.filter = 'blur(4px)';
     ctx.globalCompositeOperation = 'source-over';
     // Single compound path — all sub-paths before fill('evenodd')
     ctx.beginPath();
@@ -194,6 +194,6 @@ export function generateMasks(landmarks, w, h) {
         auxCanvas: aux.c,
         blushLUV: [lx / w, 1 - ly / h],
         blushRUV: [rx / w, 1 - ry / h],
-        blushRad: faceWidth * 0.22,
+        blushRad: faceWidth * 0.32,
     };
 }

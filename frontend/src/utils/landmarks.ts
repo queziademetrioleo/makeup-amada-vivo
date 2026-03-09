@@ -38,8 +38,8 @@ export const LANDMARK_GROUPS = {
   noseSides: [48, 64, 102, 331, 294, 278],
 
   // Under-eye (concealer) — ONLY the lower eyelid arc below each eye
-  leftUnderEye: [33, 144, 145, 153, 154, 155, 133],
-  rightUnderEye: [362, 373, 374, 380, 381, 382, 263],
+  leftUnderEye: [33, 144, 145, 153, 154, 155, 133, 50],
+  rightUnderEye: [263, 373, 374, 380, 381, 382, 362, 280],
 } as const;
 
 // ── Conversion helpers ─────────────────────────────────────────────────────────
