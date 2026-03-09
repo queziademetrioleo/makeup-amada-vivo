@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWebcam } from '@/hooks/useWebcam';
@@ -29,20 +29,20 @@ const STEP_CATEGORY: Record<SelectionStep, string> = {
 // Opacity defaults per step
 const STEP_OPACITY: Record<SelectionStep, number> = {
   batom: 0.85,
-  base: 0.45,
-  corretivo: 0.55,
-  blush: 0.55,
+  base: 0.75,
+  corretivo: 0.80,
+  blush: 0.60,
 };
 
 function applyStepColor(
-  step: SelectionStep,
   color: string,
+  opacity: number,
   updateLipstick: (p: object) => void,
   updateFoundation: (p: object) => void,
   updateContour: (p: object) => void,
   updateBlush: (p: object) => void,
+  step?: SelectionStep,
 ) {
-  const opacity = STEP_OPACITY[step];
   switch (step) {
     case 'batom':
       updateLipstick({ color, opacity, enabled: true, glossy: false });
@@ -147,33 +147,33 @@ export function SelectionFlowPage() {
 
   const [selectedProductIndex, setSelectedProductIndex] = useState(0);
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
+  const [intensity, setIntensity] = useState<number>(currentStep ? STEP_OPACITY[currentStep] : 0.75);
   const prevStepRef = useRef<number>(-1);
 
-  const selectedProduct = stepProducts[selectedProductIndex] ?? null;
-  const selectedColor: ProductColor | null = selectedProduct?.colors[selectedColorIndex] ?? null;
-
-  // When step changes, reset product/color selection and auto-preview first color
+  // When step changes, reset product/color selection and intensity
   useEffect(() => {
     if (!currentStep) return;
     if (prevStepRef.current !== stepIndex) {
       prevStepRef.current = stepIndex;
       setSelectedProductIndex(0);
       setSelectedColorIndex(0);
+      setIntensity(STEP_OPACITY[currentStep]);
     }
   }, [stepIndex, currentStep]);
 
-  // Auto-preview color whenever product/color/step selection changes
+  const selectedProduct = stepProducts[selectedProductIndex] ?? null;
+  const selectedColor: ProductColor | null = selectedProduct?.colors[selectedColorIndex] ?? null;
+
+  // Apply color + intensity whenever any of these change
+  const applyColor = useCallback((color: string, opacity: number) => {
+    if (!currentStep) return;
+    applyStepColor(color, opacity, updateLipstick, updateFoundation, updateContour, updateBlush, currentStep);
+  }, [currentStep, updateLipstick, updateFoundation, updateContour, updateBlush]);
+
   useEffect(() => {
     if (!currentStep || !selectedColor) return;
-    applyStepColor(
-      currentStep,
-      selectedColor.hex,
-      updateLipstick,
-      updateFoundation,
-      updateContour,
-      updateBlush,
-    );
-  }, [currentStep, selectedColor, updateLipstick, updateFoundation, updateContour, updateBlush]);
+    applyColor(selectedColor.hex, intensity);
+  }, [currentStep, selectedColor, intensity, applyColor]);
 
   // Start webcam on mount
   useEffect(() => {
@@ -411,7 +411,7 @@ export function SelectionFlowPage() {
 
                 {/* Selected color preview */}
                 {selectedColor && (
-                  <div className="px-5 pb-4">
+                  <div className="px-5 pb-3">
                     <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
                       <div
                         className="w-8 h-8 rounded-full flex-shrink-0 shadow-sm"
@@ -420,6 +420,31 @@ export function SelectionFlowPage() {
                       <div>
                         <div className="text-sm text-white font-medium">{selectedColor.name}</div>
                         <div className="text-xs text-white/40">{selectedColor.hex}</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Intensity slider */}
+                {currentStep && (
+                  <div className="px-5 pb-4">
+                    <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(236,72,153,0.07)', border: '1px solid rgba(236,72,153,0.20)' }}>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#EC4899' }}>◈ Intensidade</span>
+                        <span className="text-xs font-mono font-semibold" style={{ color: '#EC4899' }}>{Math.round(intensity * 100)}%</span>
+                      </div>
+                      <div className="relative h-2.5 rounded-full" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                        <div
+                          className="absolute inset-y-0 left-0 rounded-full"
+                          style={{ width: `${intensity * 100}%`, background: 'linear-gradient(90deg, #EC4899, #8B5CF6)' }}
+                        />
+                        <input
+                          type="range" min={0} max={1} step={0.01}
+                          value={intensity}
+                          onChange={(e) => setIntensity(parseFloat(e.target.value))}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          style={{ margin: 0 }}
+                        />
                       </div>
                     </div>
                   </div>
@@ -610,6 +635,31 @@ export function SelectionFlowPage() {
                   </div>
                 )}
               </div>
+
+              {/* Intensity slider — mobile */}
+              {currentStep && (
+                <div className="flex-shrink-0 px-5 pb-2">
+                  <div className="rounded-xl px-4 py-2.5" style={{ background: 'rgba(236,72,153,0.07)', border: '1px solid rgba(236,72,153,0.20)' }}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#EC4899' }}>◈ Intensidade</span>
+                      <span className="text-xs font-mono font-semibold" style={{ color: '#EC4899' }}>{Math.round(intensity * 100)}%</span>
+                    </div>
+                    <div className="relative h-2.5 rounded-full" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                      <div
+                        className="absolute inset-y-0 left-0 rounded-full"
+                        style={{ width: `${intensity * 100}%`, background: 'linear-gradient(90deg, #EC4899, #8B5CF6)' }}
+                      />
+                      <input
+                        type="range" min={0} max={1} step={0.01}
+                        value={intensity}
+                        onChange={(e) => setIntensity(parseFloat(e.target.value))}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        style={{ margin: 0 }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Choose button */}
               <div className="flex-shrink-0 px-5 pb-5 pt-2">

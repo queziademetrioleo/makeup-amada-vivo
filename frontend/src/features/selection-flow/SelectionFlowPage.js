@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWebcam } from '@/hooks/useWebcam';
@@ -20,12 +20,11 @@ const STEP_CATEGORY = {
 // Opacity defaults per step
 const STEP_OPACITY = {
     batom: 0.85,
-    base: 0.45,
-    corretivo: 0.55,
-    blush: 0.55,
+    base: 0.75,
+    corretivo: 0.80,
+    blush: 0.60,
 };
-function applyStepColor(step, color, updateLipstick, updateFoundation, updateContour, updateBlush) {
-    const opacity = STEP_OPACITY[step];
+function applyStepColor(color, opacity, updateLipstick, updateFoundation, updateContour, updateBlush, step) {
     switch (step) {
         case 'batom':
             updateLipstick({ color, opacity, enabled: true, glossy: false });
@@ -68,10 +67,9 @@ export function SelectionFlowPage() {
         : [];
     const [selectedProductIndex, setSelectedProductIndex] = useState(0);
     const [selectedColorIndex, setSelectedColorIndex] = useState(0);
+    const [intensity, setIntensity] = useState(currentStep ? STEP_OPACITY[currentStep] : 0.75);
     const prevStepRef = useRef(-1);
-    const selectedProduct = stepProducts[selectedProductIndex] ?? null;
-    const selectedColor = selectedProduct?.colors[selectedColorIndex] ?? null;
-    // When step changes, reset product/color selection and auto-preview first color
+    // When step changes, reset product/color selection and intensity
     useEffect(() => {
         if (!currentStep)
             return;
@@ -79,14 +77,22 @@ export function SelectionFlowPage() {
             prevStepRef.current = stepIndex;
             setSelectedProductIndex(0);
             setSelectedColorIndex(0);
+            setIntensity(STEP_OPACITY[currentStep]);
         }
     }, [stepIndex, currentStep]);
-    // Auto-preview color whenever product/color/step selection changes
+    const selectedProduct = stepProducts[selectedProductIndex] ?? null;
+    const selectedColor = selectedProduct?.colors[selectedColorIndex] ?? null;
+    // Apply color + intensity whenever any of these change
+    const applyColor = useCallback((color, opacity) => {
+        if (!currentStep)
+            return;
+        applyStepColor(color, opacity, updateLipstick, updateFoundation, updateContour, updateBlush, currentStep);
+    }, [currentStep, updateLipstick, updateFoundation, updateContour, updateBlush]);
     useEffect(() => {
         if (!currentStep || !selectedColor)
             return;
-        applyStepColor(currentStep, selectedColor.hex, updateLipstick, updateFoundation, updateContour, updateBlush);
-    }, [currentStep, selectedColor, updateLipstick, updateFoundation, updateContour, updateBlush]);
+        applyColor(selectedColor.hex, intensity);
+    }, [currentStep, selectedColor, intensity, applyColor]);
     // Start webcam on mount
     useEffect(() => {
         start();
@@ -141,7 +147,7 @@ export function SelectionFlowPage() {
                                                                     ...(selectedColorIndex === cIdx
                                                                         ? { outline: '2px solid #EC4899', outlineOffset: 2, transform: 'scale(1.10)', boxShadow: '0 0 12px rgba(236,72,153,0.5)' }
                                                                         : {}),
-                                                                } }), _jsx("span", { className: "text-[9px] text-center leading-tight transition-colors", style: { color: selectedColorIndex === cIdx ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.3)' }, children: color.name })] }, color.id))) })] })), selectedColor && (_jsx("div", { className: "px-5 pb-4", children: _jsxs("div", { className: "flex items-center gap-3 px-3 py-2.5 rounded-xl", style: { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }, children: [_jsx("div", { className: "w-8 h-8 rounded-full flex-shrink-0 shadow-sm", style: { backgroundColor: selectedColor.hex, border: '1px solid rgba(255,255,255,0.1)' } }), _jsxs("div", { children: [_jsx("div", { className: "text-sm text-white font-medium", children: selectedColor.name }), _jsx("div", { className: "text-xs text-white/40", children: selectedColor.hex })] })] }) })), _jsx("div", { className: "flex-1" })] }, currentStep)) }), _jsxs("div", { className: "p-5 border-t", style: { borderColor: 'rgba(255,255,255,0.07)' }, children: [_jsx("button", { onClick: handleChoose, disabled: !selectedColor || !currentStep, className: "btn-gradient w-full text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed", style: { minHeight: 52 }, children: currentStep ? `Escolher ${STEP_LABELS[currentStep]}` : 'Escolher' }), stepIndex > 0 && (_jsxs("p", { className: "text-center text-xs text-white/30 mt-2", children: ["Passo ", stepIndex + 1, " de ", STEPS.length] }))] })] })] }), _jsxs("div", { className: "lg:hidden flex flex-col h-full", children: [_jsxs("div", { className: "flex-1 relative min-h-0", children: [isReady ? (_jsx("div", { className: "absolute inset-0", children: _jsx(TryOnCanvas, { videoRef: videoRef, faceLandmarkerRef: faceLandmarkerRef, config: config, showBeforeAfter: false, showDebug: false, faceMeshReady: faceMeshReady, faceDetected: faceDetected }) })) : (_jsx("div", { className: "absolute inset-0", children: _jsx(CameraPermission, { status: cameraStatus, error: error, onStart: start }) })), _jsxs("div", { className: "absolute top-0 left-0 right-0 z-10 flex items-center px-4 gap-3", style: {
+                                                                } }), _jsx("span", { className: "text-[9px] text-center leading-tight transition-colors", style: { color: selectedColorIndex === cIdx ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.3)' }, children: color.name })] }, color.id))) })] })), selectedColor && (_jsx("div", { className: "px-5 pb-3", children: _jsxs("div", { className: "flex items-center gap-3 px-3 py-2.5 rounded-xl", style: { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }, children: [_jsx("div", { className: "w-8 h-8 rounded-full flex-shrink-0 shadow-sm", style: { backgroundColor: selectedColor.hex, border: '1px solid rgba(255,255,255,0.1)' } }), _jsxs("div", { children: [_jsx("div", { className: "text-sm text-white font-medium", children: selectedColor.name }), _jsx("div", { className: "text-xs text-white/40", children: selectedColor.hex })] })] }) })), currentStep && (_jsx("div", { className: "px-5 pb-4", children: _jsxs("div", { className: "rounded-xl px-4 py-3", style: { background: 'rgba(236,72,153,0.07)', border: '1px solid rgba(236,72,153,0.20)' }, children: [_jsxs("div", { className: "flex items-center justify-between mb-2", children: [_jsx("span", { className: "text-xs font-bold uppercase tracking-widest", style: { color: '#EC4899' }, children: "\u25C8 Intensidade" }), _jsxs("span", { className: "text-xs font-mono font-semibold", style: { color: '#EC4899' }, children: [Math.round(intensity * 100), "%"] })] }), _jsxs("div", { className: "relative h-2.5 rounded-full", style: { background: 'rgba(255,255,255,0.08)' }, children: [_jsx("div", { className: "absolute inset-y-0 left-0 rounded-full", style: { width: `${intensity * 100}%`, background: 'linear-gradient(90deg, #EC4899, #8B5CF6)' } }), _jsx("input", { type: "range", min: 0, max: 1, step: 0.01, value: intensity, onChange: (e) => setIntensity(parseFloat(e.target.value)), className: "absolute inset-0 w-full h-full opacity-0 cursor-pointer", style: { margin: 0 } })] })] }) })), _jsx("div", { className: "flex-1" })] }, currentStep)) }), _jsxs("div", { className: "p-5 border-t", style: { borderColor: 'rgba(255,255,255,0.07)' }, children: [_jsx("button", { onClick: handleChoose, disabled: !selectedColor || !currentStep, className: "btn-gradient w-full text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed", style: { minHeight: 52 }, children: currentStep ? `Escolher ${STEP_LABELS[currentStep]}` : 'Escolher' }), stepIndex > 0 && (_jsxs("p", { className: "text-center text-xs text-white/30 mt-2", children: ["Passo ", stepIndex + 1, " de ", STEPS.length] }))] })] })] }), _jsxs("div", { className: "lg:hidden flex flex-col h-full", children: [_jsxs("div", { className: "flex-1 relative min-h-0", children: [isReady ? (_jsx("div", { className: "absolute inset-0", children: _jsx(TryOnCanvas, { videoRef: videoRef, faceLandmarkerRef: faceLandmarkerRef, config: config, showBeforeAfter: false, showDebug: false, faceMeshReady: faceMeshReady, faceDetected: faceDetected }) })) : (_jsx("div", { className: "absolute inset-0", children: _jsx(CameraPermission, { status: cameraStatus, error: error, onStart: start }) })), _jsxs("div", { className: "absolute top-0 left-0 right-0 z-10 flex items-center px-4 gap-3", style: {
                                     height: 52,
                                     background: 'rgba(8,9,16,0.65)',
                                     backdropFilter: 'blur(12px)',
@@ -170,5 +176,5 @@ export function SelectionFlowPage() {
                                                         ...(selectedColorIndex === cIdx
                                                             ? { outline: '2px solid #EC4899', outlineOffset: 2, transform: 'scale(1.08)', boxShadow: '0 0 14px rgba(236,72,153,0.55)' }
                                                             : {}),
-                                                    } }), _jsx("span", { className: "text-[8px] text-center leading-tight", style: { color: selectedColorIndex === cIdx ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.3)' }, children: color.name })] }, color.id))) })) }), _jsx("div", { className: "flex-shrink-0 px-5 pb-5 pt-2", children: _jsx("button", { onClick: handleChoose, disabled: !selectedColor, className: "btn-gradient w-full text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed", style: { minHeight: 52 }, children: currentStep ? `Escolher ${STEP_LABELS[currentStep]}` : 'Escolher' }) })] }, currentStep)) })] })] }));
+                                                    } }), _jsx("span", { className: "text-[8px] text-center leading-tight", style: { color: selectedColorIndex === cIdx ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.3)' }, children: color.name })] }, color.id))) })) }), currentStep && (_jsx("div", { className: "flex-shrink-0 px-5 pb-2", children: _jsxs("div", { className: "rounded-xl px-4 py-2.5", style: { background: 'rgba(236,72,153,0.07)', border: '1px solid rgba(236,72,153,0.20)' }, children: [_jsxs("div", { className: "flex items-center justify-between mb-1.5", children: [_jsx("span", { className: "text-xs font-bold uppercase tracking-widest", style: { color: '#EC4899' }, children: "\u25C8 Intensidade" }), _jsxs("span", { className: "text-xs font-mono font-semibold", style: { color: '#EC4899' }, children: [Math.round(intensity * 100), "%"] })] }), _jsxs("div", { className: "relative h-2.5 rounded-full", style: { background: 'rgba(255,255,255,0.08)' }, children: [_jsx("div", { className: "absolute inset-y-0 left-0 rounded-full", style: { width: `${intensity * 100}%`, background: 'linear-gradient(90deg, #EC4899, #8B5CF6)' } }), _jsx("input", { type: "range", min: 0, max: 1, step: 0.01, value: intensity, onChange: (e) => setIntensity(parseFloat(e.target.value)), className: "absolute inset-0 w-full h-full opacity-0 cursor-pointer", style: { margin: 0 } })] })] }) })), _jsx("div", { className: "flex-shrink-0 px-5 pb-5 pt-2", children: _jsx("button", { onClick: handleChoose, disabled: !selectedColor, className: "btn-gradient w-full text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed", style: { minHeight: 52 }, children: currentStep ? `Escolher ${STEP_LABELS[currentStep]}` : 'Escolher' }) })] }, currentStep)) })] })] }));
 }

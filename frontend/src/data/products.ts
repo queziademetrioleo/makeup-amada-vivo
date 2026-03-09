@@ -59,10 +59,14 @@ export const PRODUCTS: Product[] = [
     reviewCount: 456,
     description: 'Cobertura média com efeito skin tint. FPS 30. Fórmula com ácido hialurônico.',
     colors: [
-      { id: 'n10', name: 'N10 Porcelana', hex: '#F5E4D0' },
-      { id: 'n20', name: 'N20 Bege Claro', hex: '#ECCDB0' },
+      { id: 'n05', name: 'N05 Porcelana', hex: '#FAF0E6' },
+      { id: 'n10', name: 'N10 Bege Claro', hex: '#F2DFC8' },
+      { id: 'n20', name: 'N20 Bege Natural', hex: '#E8C9B0' },
       { id: 'n30', name: 'N30 Bege Médio', hex: '#D4B090' },
       { id: 'n40', name: 'N40 Dourado', hex: '#C49870' },
+      { id: 'n50', name: 'N50 Bronze', hex: '#A07050' },
+      { id: 'n60', name: 'N60 Mogno', hex: '#7A5235' },
+      { id: 'n70', name: 'N70 Cacau', hex: '#5A381E' },
     ],
   },
   {

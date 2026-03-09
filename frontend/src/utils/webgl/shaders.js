@@ -151,13 +151,13 @@ export const FRAG_SRC = /* glsl */ `
     // 2. Foundation — soft-light for natural skin-tone coverage
     if (u_foundOpacity > 0.0 && foundFill > 0.001) {
       vec3 b = blendSoftLight(col, toLinear(u_foundColor));
-      col    = mix(col, b, foundFill * u_foundOpacity * 0.28);
+      col    = mix(col, b, foundFill * u_foundOpacity * 0.55);
     }
 
     // 3. Contour — multiply to sculpt jaw/cheekbones
     if (u_contOpacity > 0.0 && contFill > 0.001) {
       vec3 b = blendMultiply(col, toLinear(u_contColor));
-      col    = mix(col, b, contFill * u_contOpacity * 0.45);
+      col    = mix(col, b, contFill * u_contOpacity * 0.70);
     }
 
     // 4. Blush — soft-light for a natural rosy flush
