@@ -88,28 +88,15 @@ function drawBrowMask(ctx, landmarks, w, h) {
         ctx.stroke();
     }
     ctx.filter = 'none';
-    // ── G channel = under-eye concealer (soft ellipses below each eye) ────────
-    const eyeW = faceWidth * 0.10; // half-width of under-eye ellipse
-    const eyeH = faceWidth * 0.035; // half-height
-    const dropY = faceWidth * 0.03; // shift downward from eyelid centroid
+    // ── G channel = under-eye concealer (filled polygon triangles below eyes) ──
     ctx.globalCompositeOperation = 'source-over';
-    ctx.filter = 'blur(4px)';
+    ctx.filter = 'blur(6px)';
     for (const group of [LANDMARK_GROUPS.leftUnderEye, LANDMARK_GROUPS.rightUnderEye]) {
         const pts = groupToPixels(group, landmarks, w, h);
-        const cx = pts.reduce((s, p) => s + p[0], 0) / pts.length;
-        const cy = pts.reduce((s, p) => s + p[1], 0) / pts.length + dropY;
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.scale(eyeW, eyeH);
-        const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
-        g.addColorStop(0, 'rgba(0,255,0,0.85)');
-        g.addColorStop(0.6, 'rgba(0,255,0,0.5)');
-        g.addColorStop(1, 'rgba(0,255,0,0)');
         ctx.beginPath();
-        ctx.arc(0, 0, 1, 0, Math.PI * 2);
-        ctx.fillStyle = g;
+        polyPath(ctx, pts);
+        ctx.fillStyle = '#00ff00';
         ctx.fill();
-        ctx.restore();
     }
     ctx.filter = 'none';
 }

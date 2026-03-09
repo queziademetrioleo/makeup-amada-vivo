@@ -1,18 +1,14 @@
 import { Routes, Route } from 'react-router-dom';
-import { LandingPage } from '@/features/landing/LandingPage';
-import { SelectionFlowPage } from '@/features/selection-flow/SelectionFlowPage';
-import { ReceiptPage } from '@/features/receipt/ReceiptPage';
-import { QueueStatusPage } from '@/features/queue/QueueStatusPage';
-import { MaquiadorPage } from '@/features/maquiador/MaquiadorPage';
+import { IntroPage } from '@/features/intro/IntroPage';
+import { CapturePage } from '@/features/capture/CapturePage';
+import { MirrorPage } from '@/features/mirror/MirrorPage';
 
 export function App() {
   return (
     <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/selecao" element={<SelectionFlowPage />} />
-      <Route path="/recibo" element={<ReceiptPage />} />
-      <Route path="/fila/:orderId" element={<QueueStatusPage />} />
-      <Route path="/maquiador" element={<MaquiadorPage />} />
+      <Route path="/" element={<IntroPage />} />
+      <Route path="/captura" element={<CapturePage />} />
+      <Route path="/espelho" element={<MirrorPage />} />
     </Routes>
   );
 }
