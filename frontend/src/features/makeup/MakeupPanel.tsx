@@ -1,7 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import type { MakeupLayer } from '@/types/makeup';
 import { useMakeupStore } from '@/store/useMakeupStore';
-import { Slider } from '@/components/ui/Slider';
 import { LipstickControl } from './LipstickControl';
 import { BlushControl } from './BlushControl';
 import { ContourControl } from './ContourControl';
@@ -52,18 +51,19 @@ function useActiveLayerOpacity() {
   };
 
   return {
-    opacity: opacityMap[activeLayer],
-    enabled: enabledMap[activeLayer],
+    opacity:    opacityMap[activeLayer],
+    enabled:    enabledMap[activeLayer],
     setOpacity: updateMap[activeLayer],
+    label:      LAYERS.find(l => l.id === activeLayer)?.label ?? '',
   };
 }
 
 export function MakeupPanel() {
   const { activeLayer, setLayer } = useMakeupStore();
-  const { opacity, enabled, setOpacity } = useActiveLayerOpacity();
+  const { opacity, enabled, setOpacity, label } = useActiveLayerOpacity();
 
   return (
-    <div className="flex flex-col gap-3 h-full">
+    <div className="flex flex-col gap-4">
       {/* Tab row */}
       <div className="flex gap-1 bg-void rounded-xl p-1">
         {LAYERS.map((l) => (
@@ -82,14 +82,29 @@ export function MakeupPanel() {
         ))}
       </div>
 
-      {/* Intensity bar — always visible, tied to active layer */}
-      <div className="bg-void/60 rounded-xl px-3 py-2.5 border border-border/40">
-        <Slider
-          label="Intensidade"
-          value={opacity}
-          onChange={setOpacity}
-          disabled={!enabled}
-        />
+      {/* ── Intensity bar — always visible ── */}
+      <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(236,72,153,0.08)', border: '1px solid rgba(236,72,153,0.25)' }}>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#EC4899' }}>
+            Intensidade — {label}
+          </span>
+          <span className="text-xs font-mono text-white/60">{Math.round(opacity * 100)}%</span>
+        </div>
+        <div className={`relative h-2 rounded-full ${!enabled ? 'opacity-40' : ''}`} style={{ background: 'rgba(255,255,255,0.1)' }}>
+          <div
+            className="absolute inset-y-0 left-0 rounded-full"
+            style={{ width: `${opacity * 100}%`, background: 'linear-gradient(90deg, #EC4899, #8B5CF6)' }}
+          />
+          <input
+            type="range"
+            min={0} max={1} step={0.01}
+            value={opacity}
+            disabled={!enabled}
+            onChange={(e) => setOpacity(parseFloat(e.target.value))}
+            className="absolute inset-0 w-full opacity-0 cursor-pointer h-full disabled:cursor-not-allowed"
+            style={{ margin: 0 }}
+          />
+        </div>
       </div>
 
       {/* Active control */}
@@ -100,7 +115,6 @@ export function MakeupPanel() {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -8 }}
           transition={{ duration: 0.18 }}
-          className="flex-1 overflow-y-auto"
         >
           {CONTROLS[activeLayer]}
         </motion.div>
