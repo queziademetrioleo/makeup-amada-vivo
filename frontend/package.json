@@ -13,11 +13,13 @@
   "dependencies": {
     "@mediapipe/face_mesh": "^0.4.1633559619",
     "@mediapipe/tasks-vision": "^0.10.32",
+    "@types/three": "^0.183.1",
     "firebase": "^10.14.1",
     "framer-motion": "^11.11.17",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^6.28.0",
+    "three": "^0.183.2",
     "zustand": "^5.0.1"
   },
   "devDependencies": {
