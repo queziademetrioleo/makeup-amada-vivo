@@ -42,16 +42,20 @@ function drawLipMask(
   const upperInner = groupToPixels(LANDMARK_GROUPS.lipsInnerUpper, landmarks, w, h);
   const lowerInner = groupToPixels(LANDMARK_GROUPS.lipsInnerLower, landmarks, w, h);
 
-  // Outer lip polygon (full fill area)
+  // Outer lip polygon
   const outerPoly: [number,number][] = [
     ...upperOuter,
     ...[...lowerOuter].reverse().slice(1, -1),
   ];
+  // Inner mouth opening (teeth area)
+  const innerPoly: [number,number][] = [
+    ...upperInner,
+    ...[...lowerInner].reverse().slice(1, -1),
+  ];
 
-  // R channel = full lip fill — soft outer halo then sharp inner
+  // R channel = full lip fill (halo + sharp passes)
   ctx.globalCompositeOperation = 'source-over';
 
-  // Halo pass: soft feathered edge for natural border
   ctx.filter = 'blur(3px)';
   ctx.beginPath();
   polyPath(ctx, outerPoly);
@@ -59,28 +63,30 @@ function drawLipMask(
   ctx.fill();
   ctx.filter = 'none';
 
-  // Sharp pass: crisp core fill
   ctx.beginPath();
   polyPath(ctx, outerPoly);
   ctx.fillStyle = '#ff0000';
   ctx.fill();
 
-  // G channel = gloss zone — use inner lip contour for precision
-  const glossPoly: [number,number][] = [
-    ...upperInner,
-    ...[...lowerInner].reverse().slice(1, -1),
-  ];
-  // Scale inward from centroid for upper-lip gloss highlight
-  const cx = glossPoly.reduce((s, [x]) => s + x, 0) / glossPoly.length;
-  const cy = glossPoly.reduce((s, [, y]) => s + y, 0) / glossPoly.length;
+  // Punch out the inner mouth opening so teeth are not colored
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.beginPath();
+  polyPath(ctx, innerPoly);
+  ctx.fillStyle = 'rgba(255,255,255,1)';
+  ctx.fill();
+  ctx.globalCompositeOperation = 'source-over';
+
+  // G channel = gloss zone — narrow band on upper inner lip
+  const cx = upperInner.reduce((s, [x]) => s + x, 0) / upperInner.length;
+  const cy = upperInner.reduce((s, [, y]) => s + y, 0) / upperInner.length;
 
   ctx.save();
   ctx.translate(cx, cy);
-  ctx.scale(0.65, 0.35);           // narrow horizontal band on upper lip
+  ctx.scale(0.65, 0.35);
   ctx.translate(-cx, -cy);
   ctx.globalCompositeOperation = 'lighter';
   ctx.beginPath();
-  polyPath(ctx, glossPoly);
+  polyPath(ctx, upperInner);
   ctx.fillStyle = '#00ff00';
   ctx.fill();
   ctx.restore();
@@ -103,40 +109,20 @@ function drawBrowMask(
   const rightPts = groupToPixels(LANDMARK_GROUPS.rightBrow, landmarks, w, h)
                      .sort((a, b) => a[0] - b[0]);
 
-  // Two-pass: soft outer halo + sharp inner stroke
-  for (const pts of [leftPts, rightPts]) {
-    // Outer soft pass — gives natural edge blur
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.lineWidth = faceWidth * 0.024;
-    ctx.lineCap   = 'round';
-    ctx.lineJoin  = 'round';
-    ctx.filter    = 'blur(3px)';
-    ctx.strokeStyle = '#ff0000';
-    ctx.beginPath();
-    ctx.moveTo(pts[0][0], pts[0][1]);
-    for (let i = 1; i < pts.length - 1; i++) {
-      const mx = (pts[i][0] + pts[i + 1][0]) / 2;
-      const my = (pts[i][1] + pts[i + 1][1]) / 2;
-      ctx.quadraticCurveTo(pts[i][0], pts[i][1], mx, my);
-    }
-    ctx.lineTo(pts[pts.length - 1][0], pts[pts.length - 1][1]);
-    ctx.stroke();
-    ctx.filter = 'none';
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.lineWidth   = faceWidth * 0.018;
+  ctx.lineCap     = 'round';
+  ctx.lineJoin    = 'round';
+  ctx.strokeStyle = '#ff0000';
+  ctx.filter      = 'blur(2px)';
 
-    // Inner sharp pass — thin crisp arch
-    ctx.lineWidth = faceWidth * 0.012;
-    ctx.filter    = 'blur(1px)';
+  for (const pts of [leftPts, rightPts]) {
     ctx.beginPath();
     ctx.moveTo(pts[0][0], pts[0][1]);
-    for (let i = 1; i < pts.length - 1; i++) {
-      const mx = (pts[i][0] + pts[i + 1][0]) / 2;
-      const my = (pts[i][1] + pts[i + 1][1]) / 2;
-      ctx.quadraticCurveTo(pts[i][0], pts[i][1], mx, my);
-    }
-    ctx.lineTo(pts[pts.length - 1][0], pts[pts.length - 1][1]);
+    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
     ctx.stroke();
-    ctx.filter = 'none';
   }
+  ctx.filter = 'none';
 }
 
 // ── Aux mask (contour R + foundation G) ──────────────────────────────────────

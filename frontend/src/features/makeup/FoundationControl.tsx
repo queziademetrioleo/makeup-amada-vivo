@@ -3,8 +3,18 @@ import { Slider } from '@/components/ui/Slider';
 import { ColorPicker } from '@/components/ui/ColorPicker';
 
 const FOUNDATION_COLORS = [
-  '#F5E4D0', '#ECCDB0', '#E8C9B0', '#D4B090', '#C49870',
-  '#B08060', '#A07050', '#E0C8A8', '#F0D8C0', '#DBBFA0',
+  // Porcelain / Very Light
+  '#FAF0E6', '#F5E8D5', '#F2DFC8',
+  // Light / Fair
+  '#ECCDB0', '#E8C9B0', '#E2C09E',
+  // Light-Medium
+  '#D4B090', '#CEAA85', '#C9A07A',
+  // Medium
+  '#C49870', '#BA8F65', '#B08060',
+  // Medium-Tan
+  '#A07050', '#966845', '#8C613C',
+  // Tan / Deep
+  '#7A5235', '#6B4428', '#5A381E',
 ];
 
 export function FoundationControl() {

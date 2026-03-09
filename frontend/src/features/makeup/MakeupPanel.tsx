@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import type { MakeupLayer } from '@/types/makeup';
 import { useMakeupStore } from '@/store/useMakeupStore';
+import { Slider } from '@/components/ui/Slider';
 import { LipstickControl } from './LipstickControl';
 import { BlushControl } from './BlushControl';
 import { ContourControl } from './ContourControl';
@@ -23,11 +24,46 @@ const CONTROLS: Record<MakeupLayer, React.ReactNode> = {
   brows: <BrowsControl />,
 };
 
+function useActiveLayerOpacity() {
+  const { config, activeLayer, updateLipstick, updateBlush, updateContour, updateFoundation, updateBrows } = useMakeupStore();
+
+  const opacityMap: Record<MakeupLayer, number> = {
+    lipstick:   config.lipstick.opacity,
+    blush:      config.blush.opacity,
+    contour:    config.contour.opacity,
+    foundation: config.foundation.opacity,
+    brows:      config.brows.opacity,
+  };
+
+  const enabledMap: Record<MakeupLayer, boolean> = {
+    lipstick:   config.lipstick.enabled,
+    blush:      config.blush.enabled,
+    contour:    config.contour.enabled,
+    foundation: config.foundation.enabled,
+    brows:      config.brows.enabled,
+  };
+
+  const updateMap: Record<MakeupLayer, (opacity: number) => void> = {
+    lipstick:   (opacity) => updateLipstick({ opacity }),
+    blush:      (opacity) => updateBlush({ opacity }),
+    contour:    (opacity) => updateContour({ opacity }),
+    foundation: (opacity) => updateFoundation({ opacity }),
+    brows:      (opacity) => updateBrows({ opacity }),
+  };
+
+  return {
+    opacity: opacityMap[activeLayer],
+    enabled: enabledMap[activeLayer],
+    setOpacity: updateMap[activeLayer],
+  };
+}
+
 export function MakeupPanel() {
   const { activeLayer, setLayer } = useMakeupStore();
+  const { opacity, enabled, setOpacity } = useActiveLayerOpacity();
 
   return (
-    <div className="flex flex-col gap-4 h-full">
+    <div className="flex flex-col gap-3 h-full">
       {/* Tab row */}
       <div className="flex gap-1 bg-void rounded-xl p-1">
         {LAYERS.map((l) => (
@@ -44,6 +80,16 @@ export function MakeupPanel() {
             <span className="font-medium hidden sm:block">{l.label}</span>
           </button>
         ))}
+      </div>
+
+      {/* Intensity bar — always visible, tied to active layer */}
+      <div className="bg-void/60 rounded-xl px-3 py-2.5 border border-border/40">
+        <Slider
+          label="Intensidade"
+          value={opacity}
+          onChange={setOpacity}
+          disabled={!enabled}
+        />
       </div>
 
       {/* Active control */}

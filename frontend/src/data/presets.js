@@ -4,7 +4,7 @@ export const DEFAULT_MAKEUP = {
     blush: { enabled: true, color: '#E8A0A8', opacity: 0.45 },
     contour: { enabled: false, color: '#8B6B5A', opacity: 0.35 },
     foundation: { enabled: false, color: '#E8C9B0', opacity: 0.3 },
-    brows: { enabled: true, color: '#5A3D2B', opacity: 0.5 },
+    brows: { enabled: false, color: '#5A3D2B', opacity: 0.5 },
     skinSmooth: defaultSkinSmooth,
 };
 export const PRESETS = [
