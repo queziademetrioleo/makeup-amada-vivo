@@ -63,23 +63,23 @@ function drawBrowMask(
 ) {
   ctx.clearRect(0, 0, w, h);
   const faceWidth = Math.abs(landmarks[454].x - landmarks[234].x) * w;
-  const thickness = faceWidth * 0.018;
+  const thickness = faceWidth * 0.022;
 
   const leftPts  = groupToPixels(LANDMARK_GROUPS.leftBrow, landmarks, w, h);
   const rightPts = groupToPixels(LANDMARK_GROUPS.rightBrow, landmarks, w, h);
 
-  function browPolygon(pts: [number,number][]): [number,number][] {
-    const top: [number,number][] = pts.map(([x, y]) => [x, y - thickness]);
-    const bot: [number,number][] = pts.map(([x, y]) => [x, y + thickness * 0.5]);
-    return [...top, ...[...bot].reverse()];
-  }
-
   ctx.globalCompositeOperation = 'source-over';
-  ctx.filter = 'blur(2px)';
-  for (const poly of [browPolygon(leftPts), browPolygon(rightPts)]) {
-    buildPath(ctx, poly);
-    ctx.fillStyle = '#ff0000'; // R channel
-    ctx.fill();
+  // Use stroke-based approach to avoid rectangular blur artifacts
+  ctx.lineWidth = thickness * 2.2;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.filter = 'blur(5px)';
+  ctx.strokeStyle = '#ff0000';
+  for (const pts of [leftPts, rightPts]) {
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.stroke();
   }
   ctx.filter = 'none';
 }
@@ -118,10 +118,20 @@ function drawAuxMask(
 
   ctx.filter = 'blur(8px)';
   ctx.globalCompositeOperation = 'source-over';
-  buildPath(ctx, oval);
-  buildPath(ctx, leftEye);
-  buildPath(ctx, rightEye);
-  buildPath(ctx, lips);
+  // Compound path: oval filled, eyes and lips punched out via evenodd
+  ctx.beginPath();
+  ctx.moveTo(oval[0][0], oval[0][1]);
+  for (let i = 1; i < oval.length; i++) ctx.lineTo(oval[i][0], oval[i][1]);
+  ctx.closePath();
+  ctx.moveTo(leftEye[0][0], leftEye[0][1]);
+  for (let i = 1; i < leftEye.length; i++) ctx.lineTo(leftEye[i][0], leftEye[i][1]);
+  ctx.closePath();
+  ctx.moveTo(rightEye[0][0], rightEye[0][1]);
+  for (let i = 1; i < rightEye.length; i++) ctx.lineTo(rightEye[i][0], rightEye[i][1]);
+  ctx.closePath();
+  ctx.moveTo(lips[0][0], lips[0][1]);
+  for (let i = 1; i < lips.length; i++) ctx.lineTo(lips[i][0], lips[i][1]);
+  ctx.closePath();
   ctx.fillStyle = '#00ff00'; // G channel
   ctx.fill('evenodd');
   ctx.filter = 'none';
@@ -180,8 +190,8 @@ export function generateMasks(
     lipCanvas:  lip.c,
     browCanvas: brow.c,
     auxCanvas:  aux.c,
-    blushLUV:   [lx / w, ly / h],
-    blushRUV:   [rx / w, ry / h],
+    blushLUV:   [lx / w, 1 - ly / h],
+    blushRUV:   [rx / w, 1 - ry / h],
     blushRad:   faceWidth * 0.16,
   };
 }
