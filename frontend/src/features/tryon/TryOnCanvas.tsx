@@ -2,7 +2,8 @@ import { useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 
 import { AnimatePresence } from 'framer-motion';
 import type { FaceLandmarker } from '@mediapipe/tasks-vision';
 import type { NormalizedLandmarkList, MakeupConfig } from '@/types/makeup';
-import { ThreeMakeupRenderer } from '@/utils/threejs/ThreeMakeupRenderer';
+import { WebGLMakeupRenderer } from '@/utils/webgl/WebGLMakeupRenderer';
+import { generateMasks } from '@/utils/webgl/MaskGenerator';
 import { LiveBadge, FaceMeshLoadingOverlay, NoFaceIndicator } from '@/features/camera/CameraView';
 import { useCameraStore } from '@/store/useCameraStore';
 
@@ -41,11 +42,11 @@ export const TryOnCanvas = forwardRef<TryOnCanvasHandle, TryOnCanvasProps>(
     { videoRef, faceLandmarkerRef, config, showBeforeAfter, showDebug, faceMeshReady, faceDetected },
     ref,
   ) => {
-    // Three.js canvas — makeup rendered here
+    // WebGL canvas — makeup rendered here
     const glCanvasRef  = useRef<HTMLCanvasElement>(null);
     // 2D canvas — debug dots + before/after overlay
     const overlayRef   = useRef<HTMLCanvasElement>(null);
-    const rendererRef  = useRef<ThreeMakeupRenderer | null>(null);
+    const rendererRef  = useRef<WebGLMakeupRenderer | null>(null);
     const rafRef       = useRef<number>(0);
     const prevFaceRef  = useRef(false);
     const tsRef        = useRef(0);
@@ -67,15 +68,17 @@ export const TryOnCanvas = forwardRef<TryOnCanvasHandle, TryOnCanvasProps>(
       },
     }));
 
-    // Lazily create ThreeMakeupRenderer
-    const getRenderer = useCallback((video: HTMLVideoElement): ThreeMakeupRenderer | null => {
+    // Lazily create / resize WebGLMakeupRenderer
+    const getRenderer = useCallback((w: number, h: number): WebGLMakeupRenderer | null => {
       const canvas = glCanvasRef.current;
       if (!canvas) return null;
+      if (canvas.width !== w)  canvas.width  = w;
+      if (canvas.height !== h) canvas.height = h;
       if (!rendererRef.current) {
         try {
-          rendererRef.current = new ThreeMakeupRenderer(canvas, video);
+          rendererRef.current = new WebGLMakeupRenderer(canvas);
         } catch (e) {
-          console.error('Three.js init failed:', e);
+          console.error('WebGL init failed:', e);
           return null;
         }
       }
@@ -124,46 +127,67 @@ export const TryOnCanvas = forwardRef<TryOnCanvasHandle, TryOnCanvasProps>(
       const ovCtx = ov?.getContext('2d') ?? null;
       ovCtx?.clearRect(0, 0, vw, vh);
 
-      // ── Three.js render ──────────────────────────────────────────────────────
-      const renderer = getRenderer(video);
-      if (renderer) {
-        if (!showBeforeAfter) {
-          renderer.render(landmarks, config, vw, vh);
-          if (showDebug && landmarks && ovCtx) drawDebugDots(ovCtx, landmarks, vw, vh);
+      // ── WebGL render ─────────────────────────────────────────────────────────
+      if (landmarks && !showBeforeAfter) {
+        const renderer = getRenderer(vw, vh);
+        if (renderer) {
+          const masks = generateMasks(landmarks, vw, vh);
+          renderer.render(video, masks.lipCanvas, masks.browCanvas, masks.auxCanvas,
+            config, masks.blushLUV, masks.blushRUV, masks.blushRad);
+        }
+        if (showDebug && ovCtx) drawDebugDots(ovCtx, landmarks, vw, vh);
 
-        } else {
-          // Full makeup on Three.js canvas, overlay masks left half with raw video
-          renderer.render(landmarks, config, vw, vh);
+      } else if (landmarks && showBeforeAfter) {
+        // Left half = plain video in WebGL (opacity 0 for all makeup)
+        // Right half = full makeup — achieved by clipping the overlay
+        const renderer = getRenderer(vw, vh);
+        if (renderer) {
+          const masks = generateMasks(landmarks, vw, vh);
+          renderer.render(video, masks.lipCanvas, masks.browCanvas, masks.auxCanvas,
+            config, masks.blushLUV, masks.blushRUV, masks.blushRad);
+        }
 
-          if (ovCtx) {
-            ovCtx.save();
-            ovCtx.beginPath();
-            ovCtx.rect(0, 0, vw / 2, vh);
-            ovCtx.clip();
-            ovCtx.drawImage(video, 0, 0, vw, vh);
-            ovCtx.restore();
+        // Overlay: mask left half with raw video (drawn on overlay canvas)
+        if (ovCtx) {
+          ovCtx.save();
+          ovCtx.beginPath();
+          ovCtx.rect(0, 0, vw / 2, vh);
+          ovCtx.clip();
+          ovCtx.drawImage(video, 0, 0, vw, vh);
+          ovCtx.restore();
 
-            // Divider line + labels
-            const half = vw / 2;
-            ovCtx.save();
-            ovCtx.strokeStyle = 'rgba(255,255,255,0.55)';
-            ovCtx.lineWidth   = 1.5;
-            ovCtx.setLineDash([5, 4]);
-            ovCtx.beginPath();
-            ovCtx.moveTo(half, 0);
-            ovCtx.lineTo(half, vh);
-            ovCtx.stroke();
+          // Divider line + labels (appear mirrored to user, so flip them)
+          const half = vw / 2;
+          ovCtx.save();
+          ovCtx.strokeStyle = 'rgba(255,255,255,0.55)';
+          ovCtx.lineWidth   = 1.5;
+          ovCtx.setLineDash([5, 4]);
+          ovCtx.beginPath();
+          ovCtx.moveTo(half, 0);
+          ovCtx.lineTo(half, vh);
+          ovCtx.stroke();
 
-            ovCtx.save();
-            ovCtx.translate(half, 0);
-            ovCtx.scale(-1, 1);
-            ovCtx.fillStyle = 'rgba(255,255,255,0.45)';
-            ovCtx.font      = '11px Inter, sans-serif';
-            ovCtx.fillText('DEPOIS', -half + 10, 20);
-            ovCtx.fillText('ANTES', 10, 20);
-            ovCtx.restore();
-            ovCtx.restore();
-          }
+          ovCtx.save();
+          ovCtx.translate(half, 0);
+          ovCtx.scale(-1, 1);
+          ovCtx.fillStyle = 'rgba(255,255,255,0.45)';
+          ovCtx.font      = '11px Inter, sans-serif';
+          ovCtx.fillText('DEPOIS', -half + 10, 20);
+          ovCtx.fillText('ANTES', 10, 20);
+          ovCtx.restore();
+          ovCtx.restore();
+        }
+
+      } else {
+        // No face detected — just show plain video in WebGL canvas
+        const renderer = getRenderer(vw, vh);
+        if (renderer) {
+          // Render with all opacities zeroed via disabled config
+          const noMakeup = Object.fromEntries(
+            Object.entries(config).map(([k, v]) => [k, { ...v, enabled: false }])
+          ) as MakeupConfig;
+          const empty = new OffscreenCanvas(vw, vh);
+          renderer.render(video, empty, empty, empty, noMakeup, [0.3, 0.6], [0.7, 0.6], 0.1);
         }
       }
 
@@ -185,7 +209,7 @@ export const TryOnCanvas = forwardRef<TryOnCanvasHandle, TryOnCanvasProps>(
           CSS scaleX(-1) = selfie/mirror view.
           Canvas pixels are unmirrored internally; landmarks align 1:1.
         */}
-        {/* Three.js makeup output — scaleX(-1) = selfie/mirror view */}
+        {/* WebGL makeup output — scaleX(-1) = selfie/mirror view */}
         <canvas
           ref={glCanvasRef}
           className="absolute inset-0 w-full h-full object-cover"

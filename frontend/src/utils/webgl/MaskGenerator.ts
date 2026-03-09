@@ -103,20 +103,40 @@ function drawBrowMask(
   const rightPts = groupToPixels(LANDMARK_GROUPS.rightBrow, landmarks, w, h)
                      .sort((a, b) => a[0] - b[0]);
 
-  ctx.globalCompositeOperation = 'source-over';
-  ctx.lineWidth   = faceWidth * 0.018;
-  ctx.lineCap     = 'round';
-  ctx.lineJoin    = 'round';
-  ctx.strokeStyle = '#ff0000';
-  ctx.filter      = 'blur(2px)';
-
+  // Two-pass: soft outer halo + sharp inner stroke
   for (const pts of [leftPts, rightPts]) {
+    // Outer soft pass — gives natural edge blur
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.lineWidth = faceWidth * 0.024;
+    ctx.lineCap   = 'round';
+    ctx.lineJoin  = 'round';
+    ctx.filter    = 'blur(3px)';
+    ctx.strokeStyle = '#ff0000';
     ctx.beginPath();
     ctx.moveTo(pts[0][0], pts[0][1]);
-    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    for (let i = 1; i < pts.length - 1; i++) {
+      const mx = (pts[i][0] + pts[i + 1][0]) / 2;
+      const my = (pts[i][1] + pts[i + 1][1]) / 2;
+      ctx.quadraticCurveTo(pts[i][0], pts[i][1], mx, my);
+    }
+    ctx.lineTo(pts[pts.length - 1][0], pts[pts.length - 1][1]);
     ctx.stroke();
+    ctx.filter = 'none';
+
+    // Inner sharp pass — thin crisp arch
+    ctx.lineWidth = faceWidth * 0.012;
+    ctx.filter    = 'blur(1px)';
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < pts.length - 1; i++) {
+      const mx = (pts[i][0] + pts[i + 1][0]) / 2;
+      const my = (pts[i][1] + pts[i + 1][1]) / 2;
+      ctx.quadraticCurveTo(pts[i][0], pts[i][1], mx, my);
+    }
+    ctx.lineTo(pts[pts.length - 1][0], pts[pts.length - 1][1]);
+    ctx.stroke();
+    ctx.filter = 'none';
   }
-  ctx.filter = 'none';
 }
 
 // ── Aux mask (contour R + foundation G) ──────────────────────────────────────

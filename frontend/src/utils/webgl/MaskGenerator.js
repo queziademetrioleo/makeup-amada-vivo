@@ -1,125 +1,112 @@
 /**
- * MaskGenerator — draws precise makeup region masks into OffscreenCanvas
- * textures for upload to the WebGL shader.
+ * MaskGenerator — draws makeup region masks into OffscreenCanvas textures
+ * for upload to WebGL.
  *
- * Channel layout:
- *   lipCanvas  : R = lip fill,  G = gloss zone (inner upper lip)
+ * Channels per canvas:
+ *   lipCanvas  : R = lip fill,  G = gloss zone
  *   browCanvas : R = brow fill
- *   auxCanvas  : R = contour,   G = foundation (face oval – eyes – lips)
+ *   auxCanvas  : R = contour,   G = foundation
  */
 import { LANDMARK_GROUPS, groupToPixels, centroid } from '@/utils/landmarks';
-// ── helpers ──────────────────────────────────────────────────────────────────
+import { buildPath } from '@/utils/canvas';
 function oc(w, h) {
     const c = new OffscreenCanvas(w, h);
     return { c, ctx: c.getContext('2d') };
 }
-/** Draw a smooth closed polygon without calling buildPath (which resets path) */
-function polyPath(ctx, pts) {
-    if (pts.length < 3)
-        return;
-    ctx.moveTo(pts[0][0], pts[0][1]);
-    for (let i = 1; i < pts.length; i++)
-        ctx.lineTo(pts[i][0], pts[i][1]);
-    ctx.closePath();
-}
-// ── Lip mask ─────────────────────────────────────────────────────────────────
+// ── Lip mask ────────────────────────────────────────────────────────────────
 function drawLipMask(ctx, landmarks, w, h) {
     ctx.clearRect(0, 0, w, h);
     const upperOuter = groupToPixels(LANDMARK_GROUPS.lipsOuterUpper, landmarks, w, h);
     const lowerOuter = groupToPixels(LANDMARK_GROUPS.lipsOuterLower, landmarks, w, h);
-    const upperInner = groupToPixels(LANDMARK_GROUPS.lipsInnerUpper, landmarks, w, h);
-    const lowerInner = groupToPixels(LANDMARK_GROUPS.lipsInnerLower, landmarks, w, h);
-    // Outer lip polygon (full fill area)
     const outerPoly = [
         ...upperOuter,
         ...[...lowerOuter].reverse().slice(1, -1),
     ];
-    // R channel = full lip fill — soft outer halo then sharp inner
+    // R channel = full lip fill (red = 255 where lip is)
     ctx.globalCompositeOperation = 'source-over';
-    // Halo pass: soft feathered edge for natural border
-    ctx.filter = 'blur(3px)';
-    ctx.beginPath();
-    polyPath(ctx, outerPoly);
-    ctx.fillStyle = '#ff0000';
+    buildPath(ctx, outerPoly);
+    ctx.fillStyle = '#ff0000'; // R=1
     ctx.fill();
-    ctx.filter = 'none';
-    // Sharp pass: crisp core fill
-    ctx.beginPath();
-    polyPath(ctx, outerPoly);
-    ctx.fillStyle = '#ff0000';
-    ctx.fill();
-    // G channel = gloss zone — use inner lip contour for precision
-    const glossPoly = [
-        ...upperInner,
-        ...[...lowerInner].reverse().slice(1, -1),
-    ];
-    // Scale inward from centroid for upper-lip gloss highlight
-    const cx = glossPoly.reduce((s, [x]) => s + x, 0) / glossPoly.length;
-    const cy = glossPoly.reduce((s, [, y]) => s + y, 0) / glossPoly.length;
+    // G channel = gloss zone (inner 1/3 only)
+    // We approximate gloss by shrinking the outer lip path inward
+    const cx = outerPoly.reduce((s, [x]) => s + x, 0) / outerPoly.length;
+    const cy = outerPoly.reduce((s, [, y]) => s + y, 0) / outerPoly.length;
     ctx.save();
     ctx.translate(cx, cy);
-    ctx.scale(0.65, 0.35); // narrow horizontal band on upper lip
+    ctx.scale(0.55, 0.45);
     ctx.translate(-cx, -cy);
+    buildPath(ctx, outerPoly);
+    // Mix green into existing red pixels (additive)
     ctx.globalCompositeOperation = 'lighter';
-    ctx.beginPath();
-    polyPath(ctx, glossPoly);
-    ctx.fillStyle = '#00ff00';
+    ctx.fillStyle = '#00ff00'; // G=1
     ctx.fill();
     ctx.restore();
 }
-// ── Brow mask ────────────────────────────────────────────────────────────────
+// ── Brow mask ───────────────────────────────────────────────────────────────
 function drawBrowMask(ctx, landmarks, w, h) {
     ctx.clearRect(0, 0, w, h);
     const faceWidth = Math.abs(landmarks[454].x - landmarks[234].x) * w;
-    // Sort by X so the stroke follows the arch left-to-right, not zigzag.
-    // MediaPipe brow indices are not in anatomical order.
-    const leftPts = groupToPixels(LANDMARK_GROUPS.leftBrow, landmarks, w, h)
-        .sort((a, b) => a[0] - b[0]);
-    const rightPts = groupToPixels(LANDMARK_GROUPS.rightBrow, landmarks, w, h)
-        .sort((a, b) => a[0] - b[0]);
+    const thickness = faceWidth * 0.018;
+    const leftPts = groupToPixels(LANDMARK_GROUPS.leftBrow, landmarks, w, h);
+    const rightPts = groupToPixels(LANDMARK_GROUPS.rightBrow, landmarks, w, h);
+    function browPolygon(pts) {
+        const top = pts.map(([x, y]) => [x, y - thickness]);
+        const bot = pts.map(([x, y]) => [x, y + thickness * 0.5]);
+        return [...top, ...[...bot].reverse()];
+    }
     ctx.globalCompositeOperation = 'source-over';
-    ctx.lineWidth = faceWidth * 0.018;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = '#ff0000';
     ctx.filter = 'blur(2px)';
-    for (const pts of [leftPts, rightPts]) {
-        ctx.beginPath();
-        ctx.moveTo(pts[0][0], pts[0][1]);
-        for (let i = 1; i < pts.length; i++)
-            ctx.lineTo(pts[i][0], pts[i][1]);
-        ctx.stroke();
+    for (const poly of [browPolygon(leftPts), browPolygon(rightPts)]) {
+        buildPath(ctx, poly);
+        ctx.fillStyle = '#ff0000'; // R channel
+        ctx.fill();
     }
     ctx.filter = 'none';
 }
-// ── Aux mask (contour R + foundation G) ──────────────────────────────────────
+// ── Aux mask (contour R + foundation G) ────────────────────────────────────
 function drawAuxMask(ctx, landmarks, w, h) {
     ctx.clearRect(0, 0, w, h);
     const faceWidth = Math.abs(landmarks[454].x - landmarks[234].x) * w;
-    // ── R channel = contour (cheekbone / jaw area) ────────────────────────────
+    // R = contour (cheekbones + nose sides + forehead)
     ctx.globalCompositeOperation = 'source-over';
-    ctx.filter = 'blur(16px)';
+    ctx.filter = 'blur(14px)';
     for (const pts of [
         groupToPixels(LANDMARK_GROUPS.leftContour, landmarks, w, h),
         groupToPixels(LANDMARK_GROUPS.rightContour, landmarks, w, h),
     ]) {
-        ctx.beginPath();
-        polyPath(ctx, pts);
+        buildPath(ctx, pts);
         ctx.fillStyle = '#ff0000';
         ctx.fill();
     }
     ctx.filter = 'none';
-    // Nose-side contour blobs (R channel, additive)
-    const noseSize = faceWidth * 0.032;
-    ctx.filter = 'blur(4px)';
+    // G = foundation (face oval minus eyes/lips)
+    const oval = groupToPixels(LANDMARK_GROUPS.faceOval, landmarks, w, h);
+    const leftEye = groupToPixels(LANDMARK_GROUPS.leftEye, landmarks, w, h);
+    const rightEye = groupToPixels(LANDMARK_GROUPS.rightEye, landmarks, w, h);
+    const lips = [
+        ...groupToPixels(LANDMARK_GROUPS.lipsOuterUpper, landmarks, w, h),
+        ...groupToPixels(LANDMARK_GROUPS.lipsOuterLower, landmarks, w, h).slice(1, -1),
+    ];
+    ctx.filter = 'blur(8px)';
+    ctx.globalCompositeOperation = 'source-over';
+    buildPath(ctx, oval);
+    buildPath(ctx, leftEye);
+    buildPath(ctx, rightEye);
+    buildPath(ctx, lips);
+    ctx.fillStyle = '#00ff00'; // G channel
+    ctx.fill('evenodd');
+    ctx.filter = 'none';
+    // Nose side contour blobs (add to R channel)
+    const noseSize = faceWidth * 0.035;
+    ctx.filter = 'blur(5px)';
     for (const idx of [48, 278]) {
         const nx = landmarks[idx].x * w;
         const ny = landmarks[idx].y * h;
         ctx.save();
         ctx.translate(nx, ny);
-        ctx.scale(noseSize, noseSize * 2.0);
+        ctx.scale(noseSize, noseSize * 2.2);
         const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
-        g.addColorStop(0, 'rgba(255,0,0,0.65)');
+        g.addColorStop(0, 'rgba(255,0,0,0.7)');
         g.addColorStop(1, 'rgba(255,0,0,0)');
         ctx.beginPath();
         ctx.arc(0, 0, 1, 0, Math.PI * 2);
@@ -127,33 +114,6 @@ function drawAuxMask(ctx, landmarks, w, h) {
         ctx.fill();
         ctx.restore();
     }
-    ctx.filter = 'none';
-    // ── G channel = foundation (face oval – eyes – lips, compound path) ───────
-    const oval = groupToPixels(LANDMARK_GROUPS.faceOval, landmarks, w, h);
-    const leftEye = groupToPixels(LANDMARK_GROUPS.leftEye, landmarks, w, h);
-    const rightEye = groupToPixels(LANDMARK_GROUPS.rightEye, landmarks, w, h);
-    const lipsTop = groupToPixels(LANDMARK_GROUPS.lipsOuterUpper, landmarks, w, h);
-    const lipsBot = groupToPixels(LANDMARK_GROUPS.lipsOuterLower, landmarks, w, h);
-    const lips = [
-        ...lipsTop,
-        ...lipsBot.slice(1, -1),
-    ];
-    // Slightly expand eye holes so foundation doesn't bleed onto eyelids
-    const expand = (pts, scale) => {
-        const cx = pts.reduce((s, p) => s + p[0], 0) / pts.length;
-        const cy = pts.reduce((s, p) => s + p[1], 0) / pts.length;
-        return pts.map(([x, y]) => [cx + (x - cx) * scale, cy + (y - cy) * scale]);
-    };
-    ctx.filter = 'blur(8px)';
-    ctx.globalCompositeOperation = 'source-over';
-    // Single compound path — all sub-paths before fill('evenodd')
-    ctx.beginPath();
-    polyPath(ctx, oval);
-    polyPath(ctx, expand(leftEye, 1.35));
-    polyPath(ctx, expand(rightEye, 1.35));
-    polyPath(ctx, lips);
-    ctx.fillStyle = '#00ff00';
-    ctx.fill('evenodd');
     ctx.filter = 'none';
 }
 export function generateMasks(landmarks, w, h) {
@@ -163,7 +123,7 @@ export function generateMasks(landmarks, w, h) {
     drawLipMask(lip.ctx, landmarks, w, h);
     drawBrowMask(brow.ctx, landmarks, w, h);
     drawAuxMask(aux.ctx, landmarks, w, h);
-    // Blush UV centres — Y flipped to match UNPACK_FLIP_Y_WEBGL
+    // Blush UV centres (landmark → UV)
     const [lx, ly] = centroid(LANDMARK_GROUPS.leftCheek, landmarks, w, h);
     const [rx, ry] = centroid(LANDMARK_GROUPS.rightCheek, landmarks, w, h);
     const faceWidth = Math.abs(landmarks[454].x - landmarks[234].x);
@@ -171,8 +131,8 @@ export function generateMasks(landmarks, w, h) {
         lipCanvas: lip.c,
         browCanvas: brow.c,
         auxCanvas: aux.c,
-        blushLUV: [lx / w, 1 - ly / h],
-        blushRUV: [rx / w, 1 - ry / h],
+        blushLUV: [lx / w, ly / h],
+        blushRUV: [rx / w, ry / h],
         blushRad: faceWidth * 0.16,
     };
 }
