@@ -18,7 +18,7 @@ export function App() {
   }, []);
 
   const { pathname } = useLocation();
-  const isFullscreen = pathname.startsWith('/ar') || pathname.startsWith('/selecao');
+  const isFullscreen = pathname === '/' || pathname.startsWith('/ar') || pathname.startsWith('/selecao');
 
   return (
     <>

@@ -1,10 +1,20 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { HeroSection } from './HeroSection';
-import { BenefitsSection } from './BenefitsSection';
-import { CategoriesSection } from './CategoriesSection';
-import { PresetsSection } from './PresetsSection';
-import { CTASection } from './CTASection';
-import { Footer } from '@/components/layout/Footer';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 export function LandingPage() {
-    return (_jsxs("main", { children: [_jsx(HeroSection, {}), _jsx(BenefitsSection, {}), _jsx(CategoriesSection, {}), _jsx(PresetsSection, {}), _jsx(CTASection, {}), _jsx(Footer, {})] }));
+    const navigate = useNavigate();
+    return (_jsxs("div", { className: "fixed inset-0 flex flex-col items-center justify-center overflow-hidden", style: {
+            background: 'radial-gradient(ellipse at 60% 20%, #2D1B4E 0%, #1A0D2E 40%, #0D0816 100%)',
+        }, children: [_jsx("div", { className: "absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-3xl opacity-30 pointer-events-none", style: { background: 'radial-gradient(circle, #C84B8A 0%, #7B2FBE 60%, transparent 100%)' } }), _jsxs("div", { className: "relative z-10 flex flex-col items-center text-center px-8 gap-6", children: [_jsx(motion.p, { initial: { opacity: 0, y: -10 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6 }, className: "text-xs font-semibold tracking-[0.3em] uppercase text-white/50", children: "Conven\u00E7\u00E3o de Vendas 2026" }), _jsxs(motion.h1, { initial: { opacity: 0, scale: 0.92 }, animate: { opacity: 1, scale: 1 }, transition: { duration: 0.7, delay: 0.1 }, className: "text-7xl sm:text-8xl font-bold leading-none", style: {
+                            background: 'linear-gradient(135deg, #E8809A 0%, #C86DD4 50%, #ffffff 100%)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text',
+                        }, children: ["Amada", _jsx("br", {}), "Vivo"] }), _jsx(motion.p, { initial: { opacity: 0 }, animate: { opacity: 1 }, transition: { duration: 0.6, delay: 0.25 }, className: "text-white/60 text-base leading-relaxed max-w-xs", children: "Experimente a maquiagem virtual em tempo real" }), _jsx(motion.button, { initial: { opacity: 0, scale: 0.8 }, animate: { opacity: 1, scale: 1 }, transition: { duration: 0.5, delay: 0.35, type: 'spring', stiffness: 200 }, whileHover: { scale: 1.08 }, whileTap: { scale: 0.94 }, onClick: () => navigate('/selecao'), className: "w-24 h-24 rounded-full flex items-center justify-center shadow-2xl", style: {
+                            background: 'linear-gradient(135deg, #7B2FBE 0%, #C84B8A 100%)',
+                            boxShadow: '0 0 40px rgba(200, 75, 138, 0.5)',
+                        }, children: _jsx("svg", { className: "w-10 h-10 text-white", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.5", children: _jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" }) }) }), _jsx(motion.button, { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6, delay: 0.45 }, whileHover: { scale: 1.03 }, whileTap: { scale: 0.97 }, onClick: () => navigate('/selecao'), className: "w-full max-w-xs py-4 rounded-full text-white font-semibold text-lg shadow-2xl", style: {
+                            background: 'linear-gradient(90deg, #7B2FBE 0%, #C84B8A 100%)',
+                            boxShadow: '0 8px 32px rgba(200, 75, 138, 0.4)',
+                        }, children: "Toque para Come\u00E7ar" }), _jsx(motion.p, { initial: { opacity: 0 }, animate: { opacity: 1 }, transition: { duration: 0.6, delay: 0.6 }, className: "text-white/30 text-xs", children: "Nenhuma foto \u00E9 armazenada \u2022 Experi\u00EAncia 100% privada" })] })] }));
 }

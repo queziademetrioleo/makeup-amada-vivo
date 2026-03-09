@@ -17,6 +17,6 @@ export function App() {
         return unsubscribe;
     }, []);
     const { pathname } = useLocation();
-    const isFullscreen = pathname.startsWith('/ar') || pathname.startsWith('/selecao');
+    const isFullscreen = pathname === '/' || pathname.startsWith('/ar') || pathname.startsWith('/selecao');
     return (_jsxs(_Fragment, { children: [!isFullscreen && _jsx(Header, {}), _jsxs(Routes, { children: [_jsx(Route, { path: "/", element: _jsx(LandingPage, {}) }), _jsx(Route, { path: "/tryon", element: _jsx(TryOnPage, {}) }), _jsx(Route, { path: "/ar", element: _jsx(ARFlowPage, {}) }), _jsx(Route, { path: "/selecao", element: _jsx(SelectionFlowPage, {}) }), _jsx(Route, { path: "/recibo", element: _jsx(ReceiptPage, {}) }), _jsx(Route, { path: "/fila/:orderId", element: _jsx(QueueStatusPage, {}) }), _jsx(Route, { path: "/maquiador", element: _jsx(MaquiadorPage, {}) })] }), !isFullscreen && _jsx(AuthModal, {})] }));
 }
