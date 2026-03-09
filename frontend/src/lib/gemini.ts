@@ -4,7 +4,7 @@
  */
 import { GEMINI_SYSTEM_PROMPT } from '@/data/catalog';
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
 export interface GeminiResponse {
     analise_pele: {
