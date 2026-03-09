@@ -3,7 +3,7 @@
  * Calls the Gemini 2.0 Flash model with vision capabilities.
  */
 import { GEMINI_SYSTEM_PROMPT } from '@/data/catalog';
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 /**
  * Analyze a face photo and get product recommendations from Gemini.
  * @param photoBase64 Base64-encoded JPEG image (no data: prefix)

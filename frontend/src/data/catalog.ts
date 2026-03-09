@@ -101,16 +101,16 @@ ${JSON.stringify({
     ],
 }, null, 2)}
 
-Formato obrigatório da resposta:
+Formato obrigatório da resposta. VOCÊ DEVE RETORNAR APENAS O JSON PURO. NÃO ENVOLVA EM BLOCOS DE CÓDIGO (\`\`\`json). NÃO ADICIONE NENHUM TEXTO ANTES OU DEPOIS.
 {
   "analise_pele": {
-    "tom": "",
-    "subtom": ""
+    "tom": "STRING",
+    "subtom": "STRING"
   },
   "recomendacoes": {
-    "base": { "id": "", "nome": "" },
-    "batom": { "id": "", "nome": "" },
-    "blush": { "id": "", "nome": "" }
+    "base": { "id": "STRING", "nome": "STRING" },
+    "batom": { "id": "STRING", "nome": "STRING" },
+    "blush": { "id": "STRING", "nome": "STRING" }
   }
 }`;
 
