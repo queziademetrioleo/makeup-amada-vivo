@@ -39,28 +39,14 @@ function drawLipMask(ctx, landmarks, w, h) {
         ...upperInner,
         ...[...lowerInner].reverse().slice(1, -1),
     ];
-    // R channel = lip fill — sharp fill only, no blur outside boundary
+    // R channel = lip fill: draw outer ring between outer and inner contours
+    // Use evenodd so the inner mouth polygon punches a hole (teeth stay clear)
     ctx.globalCompositeOperation = 'source-over';
     ctx.beginPath();
-    polyPath(ctx, outerPoly);
+    polyPath(ctx, outerPoly); // outer boundary
+    polyPath(ctx, innerPoly); // inner hole
     ctx.fillStyle = '#ff0000';
-    ctx.fill();
-    // Punch out inner mouth so teeth stay uncolored
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.beginPath();
-    polyPath(ctx, innerPoly);
-    ctx.fillStyle = 'rgba(255,255,255,1)';
-    ctx.fill();
-    ctx.globalCompositeOperation = 'source-over';
-    // Soft edge: tiny blur pass at reduced alpha on top (stays within ~2px of boundary)
-    ctx.filter = 'blur(1px)';
-    ctx.globalAlpha = 0.4;
-    ctx.beginPath();
-    polyPath(ctx, outerPoly);
-    ctx.fillStyle = '#ff0000';
-    ctx.fill();
-    ctx.globalAlpha = 1;
-    ctx.filter = 'none';
+    ctx.fill('evenodd');
     // G channel = gloss — narrow band on upper inner lip
     const cx = upperInner.reduce((s, [x]) => s + x, 0) / upperInner.length;
     const cy = upperInner.reduce((s, [, y]) => s + y, 0) / upperInner.length;

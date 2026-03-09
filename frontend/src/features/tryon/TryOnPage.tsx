@@ -114,8 +114,8 @@ export function TryOnPage() {
       </div>
 
       {/* Controls sidebar */}
-      <div className="w-full lg:w-80 xl:w-96 p-4 lg:p-6 lg:pl-0 flex flex-col">
-        <div className="h-full lg:h-[calc(100dvh-5rem)]">
+      <div className="w-full lg:w-80 xl:w-96 p-4 pt-0 lg:p-6 lg:pl-0 lg:pt-6 flex flex-col">
+        <div className="h-[480px] lg:h-[calc(100dvh-5rem)]">
           <TryOnControls onSnapshot={handleSnapshot} isSaving={isSaving} />
         </div>
       </div>
