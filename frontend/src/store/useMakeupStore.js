@@ -27,6 +27,10 @@ export const useMakeupStore = create((set) => ({
         config: { ...s.config, brows: { ...s.config.brows, ...patch } },
         activePreset: null,
     })),
+    updateConcealer: (patch) => set((s) => ({
+        config: { ...s.config, concealer: { ...s.config.concealer, ...patch } },
+        activePreset: null,
+    })),
     applyPreset: (preset) => set({ config: preset.config, activePreset: preset.id }),
     resetConfig: () => set({ config: DEFAULT_MAKEUP, activePreset: null }),
     toggleDebug: () => set((s) => ({ showDebugLandmarks: !s.showDebugLandmarks })),

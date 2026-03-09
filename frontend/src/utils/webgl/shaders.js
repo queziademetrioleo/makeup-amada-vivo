@@ -23,7 +23,7 @@ export const FRAG_SRC = /* glsl */ `
   // ── Textures ──────────────────────────────────────────────────────────────
   uniform sampler2D u_video;       // live camera frame
   uniform sampler2D u_lipMask;     // R=lip fill, G=gloss zone
-  uniform sampler2D u_browMask;    // R=brow fill
+  uniform sampler2D u_browMask;    // R=brow fill, G=under-eye concealer
   uniform sampler2D u_auxMask;     // R=contour, G=foundation
 
   // ── Skin smoothing ────────────────────────────────────────────────────────
@@ -44,6 +44,10 @@ export const FRAG_SRC = /* glsl */ `
   uniform float     u_blushRad;
   uniform vec3      u_blushColor;
   uniform float     u_blushOpacity;
+
+  // ── Concealer (under-eye) ─────────────────────────────────────────────────
+  uniform vec3      u_concColor;
+  uniform float     u_concOpacity;
 
   // ── Brows ─────────────────────────────────────────────────────────────────
   uniform vec3      u_browColor;
@@ -143,7 +147,9 @@ export const FRAG_SRC = /* glsl */ `
     // Sample masks
     float lipFill  = texture2D(u_lipMask,  v_uv).r;
     float lipGloss = texture2D(u_lipMask,  v_uv).g;
-    float browFill = texture2D(u_browMask, v_uv).r;
+    vec4  browMask = texture2D(u_browMask, v_uv);
+    float browFill = browMask.r;
+    float concFill = browMask.g;
     vec4  aux      = texture2D(u_auxMask,  v_uv);
     float contFill = aux.r;
     float foundFill = aux.g;
@@ -172,13 +178,19 @@ export const FRAG_SRC = /* glsl */ `
       }
     }
 
-    // 5. Brows — multiply for darkening/enhancement
+    // 5. Concealer — soft-light to brighten under-eye area
+    if (u_concOpacity > 0.0 && concFill > 0.001) {
+      vec3 b = blendSoftLight(col, toLinear(u_concColor));
+      col    = mix(col, b, concFill * u_concOpacity * 0.65);
+    }
+
+    // 6. Brows — multiply for darkening/enhancement
     if (u_browOpacity > 0.0 && browFill > 0.001) {
       vec3 b = blendMultiply(col, toLinear(u_browColor));
       col    = mix(col, b, browFill * u_browOpacity * 0.72);
     }
 
-    // 6. Lips — "Color" blend mode (Photoshop pigment model)
+    // 7. Lips — "Color" blend mode (Photoshop pigment model)
     //    Applies hue+sat of lip color while keeping skin luminance.
     //    Mix with multiply for darker/richer pigment on dark shades.
     if (u_lipOpacity > 0.0 && lipFill > 0.001) {
@@ -190,7 +202,7 @@ export const FRAG_SRC = /* glsl */ `
       vec3  lipBlend = mix(colBlend, mulBlend, (1.0 - lipLum) * 0.45);
       col = mix(col, lipBlend, lipFill * u_lipOpacity * 0.92);
 
-      // 7. Gloss — screen blend adds specular sheen on center of upper lip
+      // 8. Gloss — screen blend adds specular sheen on center of upper lip
       if (u_lipGlossy > 0.0 && lipGloss > 0.001) {
         vec3 g = blendScreen(col, vec3(1.0, 0.97, 0.93));
         col    = mix(col, g, lipGloss * u_lipGlossy * 0.55);

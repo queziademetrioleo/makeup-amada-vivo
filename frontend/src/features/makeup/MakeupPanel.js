@@ -6,12 +6,14 @@ import { BlushControl } from './BlushControl';
 import { ContourControl } from './ContourControl';
 import { FoundationControl } from './FoundationControl';
 import { BrowsControl } from './BrowsControl';
+import { ConcealerControl } from './ConcealerControl';
 const LAYERS = [
     { id: 'lipstick', label: 'Batom', icon: '💄' },
     { id: 'blush', label: 'Blush', icon: '🌸' },
     { id: 'contour', label: 'Contorno', icon: '◐' },
     { id: 'foundation', label: 'Base', icon: '✦' },
     { id: 'brows', label: 'Sobrancelha', icon: '〜' },
+    { id: 'concealer', label: 'Corretivo', icon: '○' },
 ];
 const CONTROLS = {
     lipstick: _jsx(LipstickControl, {}),
@@ -19,6 +21,7 @@ const CONTROLS = {
     contour: _jsx(ContourControl, {}),
     foundation: _jsx(FoundationControl, {}),
     brows: _jsx(BrowsControl, {}),
+    concealer: _jsx(ConcealerControl, {}),
 };
 export function MakeupPanel() {
     const { activeLayer, setLayer } = useMakeupStore();

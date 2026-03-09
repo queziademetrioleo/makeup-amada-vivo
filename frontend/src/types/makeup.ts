@@ -45,12 +45,19 @@ export interface SkinSmoothConfig {
   intensity: number; // 0–1
 }
 
+export interface ConcealerConfig {
+  enabled: boolean;
+  color: string;
+  opacity: number;
+}
+
 export interface MakeupConfig {
-  lipstick: LipstickConfig;
-  blush: BlushConfig;
-  contour: ContourConfig;
+  lipstick:   LipstickConfig;
+  blush:      BlushConfig;
+  contour:    ContourConfig;
   foundation: FoundationConfig;
-  brows: BrowsConfig;
+  brows:      BrowsConfig;
+  concealer:  ConcealerConfig;
   skinSmooth: SkinSmoothConfig;
 }
 

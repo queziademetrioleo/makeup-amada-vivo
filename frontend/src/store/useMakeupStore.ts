@@ -17,6 +17,7 @@ interface MakeupState {
   updateContour: (patch: Partial<MakeupConfig['contour']>) => void;
   updateFoundation: (patch: Partial<MakeupConfig['foundation']>) => void;
   updateBrows: (patch: Partial<MakeupConfig['brows']>) => void;
+  updateConcealer: (patch: Partial<MakeupConfig['concealer']>) => void;
   applyPreset: (preset: MakeupPreset) => void;
   resetConfig: () => void;
   toggleDebug: () => void;
@@ -59,6 +60,12 @@ export const useMakeupStore = create<MakeupState>((set) => ({
   updateBrows: (patch) =>
     set((s) => ({
       config: { ...s.config, brows: { ...s.config.brows, ...patch } },
+      activePreset: null,
+    })),
+
+  updateConcealer: (patch) =>
+    set((s) => ({
+      config: { ...s.config, concealer: { ...s.config.concealer, ...patch } },
       activePreset: null,
     })),
 

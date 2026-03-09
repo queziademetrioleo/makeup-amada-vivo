@@ -48,9 +48,11 @@ function drawLipMask(
     ...[...lowerOuter].reverse().slice(1, -1),
   ];
   // Inner mouth opening (teeth area)
+  // lipsInnerUpper: left→right, lipsInnerLower: right→left — do NOT reverse lowerInner
+  // Reversing would create crossing edges (X pattern) over the teeth
   const innerPoly: [number,number][] = [
     ...upperInner,
-    ...[...lowerInner].reverse().slice(1, -1),
+    ...lowerInner.slice(1, -1),
   ];
 
   // R channel = lip fill: draw outer ring between outer and inner contours
@@ -88,6 +90,7 @@ function drawBrowMask(
   ctx.clearRect(0, 0, w, h);
   const faceWidth = Math.abs(landmarks[454].x - landmarks[234].x) * w;
 
+  // ── R channel = brows ─────────────────────────────────────────────────────
   // Sort by X so the stroke follows the arch left-to-right, not zigzag.
   // MediaPipe brow indices are not in anatomical order.
   const leftPts  = groupToPixels(LANDMARK_GROUPS.leftBrow, landmarks, w, h)
@@ -107,6 +110,34 @@ function drawBrowMask(
     ctx.moveTo(pts[0][0], pts[0][1]);
     for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
     ctx.stroke();
+  }
+  ctx.filter = 'none';
+
+  // ── G channel = under-eye concealer (soft ellipses below each eye) ────────
+  const eyeW  = faceWidth * 0.10;  // half-width of under-eye ellipse
+  const eyeH  = faceWidth * 0.035; // half-height
+  const dropY = faceWidth * 0.03;  // shift downward from eyelid centroid
+
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.filter = 'blur(4px)';
+
+  for (const group of [LANDMARK_GROUPS.leftUnderEye, LANDMARK_GROUPS.rightUnderEye]) {
+    const pts = groupToPixels(group, landmarks, w, h);
+    const cx = pts.reduce((s, p) => s + p[0], 0) / pts.length;
+    const cy = pts.reduce((s, p) => s + p[1], 0) / pts.length + dropY;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(eyeW, eyeH);
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+    g.addColorStop(0, 'rgba(0,255,0,0.85)');
+    g.addColorStop(0.6, 'rgba(0,255,0,0.5)');
+    g.addColorStop(1, 'rgba(0,255,0,0)');
+    ctx.beginPath();
+    ctx.arc(0, 0, 1, 0, Math.PI * 2);
+    ctx.fillStyle = g;
+    ctx.fill();
+    ctx.restore();
   }
   ctx.filter = 'none';
 }
@@ -222,6 +253,6 @@ export function generateMasks(
     auxCanvas:  aux.c,
     blushLUV:   [lx / w, 1 - ly / h],
     blushRUV:   [rx / w, 1 - ry / h],
-    blushRad:   faceWidth * 0.16,
+    blushRad:   faceWidth * 0.22,
   };
 }

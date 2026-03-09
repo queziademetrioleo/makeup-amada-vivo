@@ -6,13 +6,15 @@ import { BlushControl } from './BlushControl';
 import { ContourControl } from './ContourControl';
 import { FoundationControl } from './FoundationControl';
 import { BrowsControl } from './BrowsControl';
+import { ConcealerControl } from './ConcealerControl';
 
 const LAYERS: { id: MakeupLayer; label: string; icon: string }[] = [
-  { id: 'lipstick', label: 'Batom', icon: '💄' },
-  { id: 'blush', label: 'Blush', icon: '🌸' },
-  { id: 'contour', label: 'Contorno', icon: '◐' },
-  { id: 'foundation', label: 'Base', icon: '✦' },
-  { id: 'brows', label: 'Sobrancelha', icon: '〜' },
+  { id: 'lipstick',  label: 'Batom',      icon: '💄' },
+  { id: 'blush',     label: 'Blush',      icon: '🌸' },
+  { id: 'contour',   label: 'Contorno',   icon: '◐'  },
+  { id: 'foundation',label: 'Base',       icon: '✦'  },
+  { id: 'brows',     label: 'Sobrancelha',icon: '〜' },
+  { id: 'concealer', label: 'Corretivo',  icon: '○'  },
 ];
 
 const CONTROLS: Record<MakeupLayer, React.ReactNode> = {
@@ -21,6 +23,7 @@ const CONTROLS: Record<MakeupLayer, React.ReactNode> = {
   contour:    <ContourControl />,
   foundation: <FoundationControl />,
   brows:      <BrowsControl />,
+  concealer:  <ConcealerControl />,
 };
 
 export function MakeupPanel() {

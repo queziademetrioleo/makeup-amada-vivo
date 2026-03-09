@@ -1,17 +1,44 @@
-import { collection, addDoc, updateDoc, getDoc, doc, query, where, orderBy, onSnapshot, getDocs, serverTimestamp, } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, doc, query, where, orderBy, onSnapshot, getDocs, serverTimestamp, limit, } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-const WEBHOOK_URL = import.meta.env.VITE_WEBHOOK_URL;
-export async function createOrder(clientName, selections) {
+const WEBHOOK_RECIBO = 'https://kitty.n8n.ipnet.cloud/webhook/disparo-recibo-maquiagem';
+const WEBHOOK_MAQUIADOR = 'https://kitty.n8n.ipnet.cloud/webhook/maquiador-trigger';
+async function postWebhookRecibo(payload) {
+    try {
+        await fetch(WEBHOOK_RECIBO, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+    }
+    catch (e) {
+        console.warn('Webhook recibo failed:', e);
+    }
+}
+async function postWebhookMaquiador(payload) {
+    try {
+        await fetch(WEBHOOK_MAQUIADOR, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+    }
+    catch (e) {
+        console.warn('Webhook maquiador failed:', e);
+    }
+}
+export async function createOrder(clientName, whatsapp, selections) {
     const q = query(collection(db, 'orders'), where('status', '!=', 'finalizado'));
     const snap = await getDocs(q);
     const position = snap.size + 1;
     const ref = await addDoc(collection(db, 'orders'), {
         clientName,
+        whatsapp,
         status: 'aguardando',
         selections,
         createdAt: serverTimestamp(),
         queuePosition: position,
     });
+    await postWebhookRecibo({ clientName, whatsapp, selections });
     return { orderId: ref.id, queuePosition: position };
 }
 export function subscribeToOrder(orderId, callback) {
@@ -29,31 +56,17 @@ export function subscribeToQueue(callback) {
 }
 export async function startOrder(orderId) {
     await updateDoc(doc(db, 'orders', orderId), { status: 'em-atendimento' });
-    if (WEBHOOK_URL) {
-        const snap = await getDoc(doc(db, 'orders', orderId));
-        const order = { id: orderId, ...snap.data() };
-        await postWebhook({ event: 'order_started', order });
-    }
 }
 export async function completeOrder(orderId) {
-    const snap = await getDoc(doc(db, 'orders', orderId));
-    const order = { id: orderId, ...snap.data() };
     await updateDoc(doc(db, 'orders', orderId), { status: 'finalizado' });
-    if (WEBHOOK_URL) {
-        await postWebhook({ event: 'order_completed', order });
-    }
-}
-async function postWebhook(payload) {
-    if (!WEBHOOK_URL)
-        return;
-    try {
-        await fetch(WEBHOOK_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
+    const nextQuery = query(collection(db, 'orders'), where('status', '==', 'aguardando'), orderBy('queuePosition'), limit(1));
+    const next = await getDocs(nextQuery);
+    if (!next.empty) {
+        const nextOrder = { id: next.docs[0].id, ...next.docs[0].data() };
+        await postWebhookMaquiador({
+            whatsapp: nextOrder.whatsapp,
+            clientName: nextOrder.clientName,
+            selections: nextOrder.selections,
         });
-    }
-    catch (e) {
-        console.warn('Webhook POST failed:', e);
     }
 }

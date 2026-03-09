@@ -47,6 +47,7 @@ export class WebGLMakeupRenderer {
             'u_foundColor', 'u_foundOpacity',
             'u_contColor', 'u_contOpacity',
             'u_blushL', 'u_blushR', 'u_blushRad', 'u_blushColor', 'u_blushOpacity',
+            'u_concColor', 'u_concOpacity',
             'u_browColor', 'u_browOpacity',
             'u_lipColor', 'u_lipOpacity', 'u_lipGlossy',
         ];
@@ -111,6 +112,10 @@ export class WebGLMakeupRenderer {
         this.u1f('u_blushRad', blushRad);
         this.u3f('u_blushColor', blushEnabled ? hexToVec3(config.blush.color) : [0, 0, 0]);
         this.u1f('u_blushOpacity', blushEnabled ? (config.blush.opacity ?? 0) : 0);
+        // Concealer
+        const concEnabled = config.concealer?.enabled ?? false;
+        this.u3f('u_concColor', concEnabled ? hexToVec3(config.concealer.color) : [1, 1, 1]);
+        this.u1f('u_concOpacity', concEnabled ? (config.concealer.opacity ?? 0) : 0);
         // Brows
         const browEnabled = config.brows?.enabled ?? false;
         this.u3f('u_browColor', browEnabled ? hexToVec3(config.brows.color) : [0, 0, 0]);

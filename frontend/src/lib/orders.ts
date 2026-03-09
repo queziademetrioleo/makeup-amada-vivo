@@ -2,7 +2,6 @@ import {
   collection,
   addDoc,
   updateDoc,
-  getDoc,
   doc,
   query,
   where,
@@ -10,23 +9,47 @@ import {
   onSnapshot,
   getDocs,
   serverTimestamp,
+  limit,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { SelectionStep, StepSelection } from '@/store/useOrderStore';
 
-const WEBHOOK_URL = import.meta.env.VITE_WEBHOOK_URL as string | undefined;
+const WEBHOOK_RECIBO    = 'https://kitty.n8n.ipnet.cloud/webhook/disparo-recibo-maquiagem';
+const WEBHOOK_MAQUIADOR = 'https://kitty.n8n.ipnet.cloud/webhook/maquiador-trigger';
 
 export interface Order {
   id: string;
   clientName: string;
+  whatsapp: string;
   status: 'aguardando' | 'em-atendimento' | 'finalizado';
   selections: Partial<Record<SelectionStep, StepSelection>>;
   createdAt: ReturnType<typeof serverTimestamp>;
   queuePosition: number;
 }
 
+async function postWebhookRecibo(payload: object) {
+  try {
+    await fetch(WEBHOOK_RECIBO, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  } catch (e) { console.warn('Webhook recibo failed:', e); }
+}
+
+async function postWebhookMaquiador(payload: object) {
+  try {
+    await fetch(WEBHOOK_MAQUIADOR, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  } catch (e) { console.warn('Webhook maquiador failed:', e); }
+}
+
 export async function createOrder(
   clientName: string,
+  whatsapp: string,
   selections: Partial<Record<SelectionStep, StepSelection>>,
 ): Promise<{ orderId: string; queuePosition: number }> {
   const q = query(collection(db, 'orders'), where('status', '!=', 'finalizado'));
@@ -35,11 +58,14 @@ export async function createOrder(
 
   const ref = await addDoc(collection(db, 'orders'), {
     clientName,
+    whatsapp,
     status: 'aguardando',
     selections,
     createdAt: serverTimestamp(),
     queuePosition: position,
   });
+
+  await postWebhookRecibo({ clientName, whatsapp, selections });
 
   return { orderId: ref.id, queuePosition: position };
 }
@@ -69,31 +95,24 @@ export function subscribeToQueue(callback: (orders: Order[]) => void): () => voi
 
 export async function startOrder(orderId: string): Promise<void> {
   await updateDoc(doc(db, 'orders', orderId), { status: 'em-atendimento' });
-  if (WEBHOOK_URL) {
-    const snap = await getDoc(doc(db, 'orders', orderId));
-    const order = { id: orderId, ...snap.data() } as Order;
-    await postWebhook({ event: 'order_started', order });
-  }
 }
 
 export async function completeOrder(orderId: string): Promise<void> {
-  const snap = await getDoc(doc(db, 'orders', orderId));
-  const order = { id: orderId, ...snap.data() } as Order;
   await updateDoc(doc(db, 'orders', orderId), { status: 'finalizado' });
-  if (WEBHOOK_URL) {
-    await postWebhook({ event: 'order_completed', order });
-  }
-}
 
-async function postWebhook(payload: object): Promise<void> {
-  if (!WEBHOOK_URL) return;
-  try {
-    await fetch(WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+  const nextQuery = query(
+    collection(db, 'orders'),
+    where('status', '==', 'aguardando'),
+    orderBy('queuePosition'),
+    limit(1),
+  );
+  const next = await getDocs(nextQuery);
+  if (!next.empty) {
+    const nextOrder = { id: next.docs[0].id, ...next.docs[0].data() } as Order;
+    await postWebhookMaquiador({
+      whatsapp: nextOrder.whatsapp,
+      clientName: nextOrder.clientName,
+      selections: nextOrder.selections,
     });
-  } catch (e) {
-    console.warn('Webhook POST failed:', e);
   }
 }

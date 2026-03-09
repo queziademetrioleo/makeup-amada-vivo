@@ -24,7 +24,7 @@ const STEP_OPACITY = {
     corretivo: 0.80,
     blush: 0.60,
 };
-function applyStepColor(color, opacity, updateLipstick, updateFoundation, updateContour, updateBlush, step) {
+function applyStepColor(color, opacity, updateLipstick, updateFoundation, updateConcealer, updateBlush, step) {
     switch (step) {
         case 'batom':
             updateLipstick({ color, opacity, enabled: true, glossy: false });
@@ -33,7 +33,7 @@ function applyStepColor(color, opacity, updateLipstick, updateFoundation, update
             updateFoundation({ color, opacity, enabled: true });
             break;
         case 'corretivo':
-            updateContour({ color, opacity, enabled: true });
+            updateConcealer({ color, opacity, enabled: true });
             break;
         case 'blush':
             updateBlush({ color, opacity, enabled: true });
@@ -41,25 +41,32 @@ function applyStepColor(color, opacity, updateLipstick, updateFoundation, update
     }
 }
 function NameModal({ onConfirm }) {
-    const [value, setValue] = useState('');
-    return (_jsx(motion.div, { initial: { opacity: 0 }, animate: { opacity: 1 }, className: "fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-6", children: _jsxs(motion.div, { initial: { scale: 0.9, opacity: 0 }, animate: { scale: 1, opacity: 1 }, transition: { type: 'spring', stiffness: 300, damping: 25 }, className: "glass-card p-8 w-full max-w-sm shadow-2xl", children: [_jsx("div", { className: "w-12 h-12 rounded-full flex items-center justify-center mb-6 mx-auto", style: { background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)' }, children: _jsx("span", { className: "text-xl", children: "\uD83D\uDC84" }) }), _jsx("h2", { className: "text-2xl font-bold text-white text-center mb-2", style: { fontFamily: "'Playfair Display', serif" }, children: "Bem-vinda ao Try-On Guiado" }), _jsx("p", { className: "text-white/50 text-sm text-center mb-6", children: "Vamos encontrar o look perfeito para voc\u00EA passo a passo." }), _jsx("label", { className: "block text-sm text-white/60 mb-2", children: "Qual \u00E9 o seu nome?" }), _jsx("input", { type: "text", value: value, onChange: (e) => setValue(e.target.value), onKeyDown: (e) => {
-                        if (e.key === 'Enter' && value.trim())
-                            onConfirm(value.trim());
-                    }, placeholder: "Digite seu nome...", autoFocus: true, className: "w-full mb-4 px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/30", style: {
+    const [name, setName] = useState('');
+    const [whatsapp, setWhatsapp] = useState('');
+    const canSubmit = name.trim() && whatsapp.trim();
+    return (_jsx(motion.div, { initial: { opacity: 0 }, animate: { opacity: 1 }, className: "fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-6", children: _jsxs(motion.div, { initial: { scale: 0.9, opacity: 0 }, animate: { scale: 1, opacity: 1 }, transition: { type: 'spring', stiffness: 300, damping: 25 }, className: "glass-card p-8 w-full max-w-sm shadow-2xl", children: [_jsx("div", { className: "w-12 h-12 rounded-full flex items-center justify-center mb-6 mx-auto", style: { background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)' }, children: _jsx("span", { className: "text-xl", children: "\uD83D\uDC84" }) }), _jsx("h2", { className: "text-2xl font-bold text-white text-center mb-2", style: { fontFamily: "'Playfair Display', serif" }, children: "Bem-vinda ao Try-On Guiado" }), _jsx("p", { className: "text-white/50 text-sm text-center mb-6", children: "Vamos encontrar o look perfeito para voc\u00EA passo a passo." }), _jsx("label", { className: "block text-sm text-white/60 mb-2", children: "Qual \u00E9 o seu nome?" }), _jsx("input", { type: "text", value: name, onChange: (e) => setName(e.target.value), placeholder: "Digite seu nome...", autoFocus: true, className: "w-full mb-4 px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/30", style: {
                         background: 'rgba(255,255,255,0.05)',
                         border: '1px solid rgba(255,255,255,0.10)',
                         borderRadius: 14,
                         minHeight: 48,
-                    } }), _jsx("button", { disabled: !value.trim(), onClick: () => { if (value.trim())
-                        onConfirm(value.trim()); }, className: "btn-gradient w-full text-white font-semibold disabled:opacity-40 disabled:cursor-not-allowed", style: { minHeight: 52 }, children: "Come\u00E7ar" })] }) }));
+                    } }), _jsx("label", { className: "block text-sm text-white/60 mb-2", children: "WhatsApp" }), _jsx("input", { type: "tel", value: whatsapp, onChange: (e) => setWhatsapp(e.target.value), onKeyDown: (e) => {
+                        if (e.key === 'Enter' && canSubmit)
+                            onConfirm(name.trim(), whatsapp.trim());
+                    }, placeholder: "(DDD) 9 9999-9999", className: "w-full mb-6 px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/30", style: {
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '1px solid rgba(255,255,255,0.10)',
+                        borderRadius: 14,
+                        minHeight: 48,
+                    } }), _jsx("button", { disabled: !canSubmit, onClick: () => { if (canSubmit)
+                        onConfirm(name.trim(), whatsapp.trim()); }, className: "btn-gradient w-full text-white font-semibold disabled:opacity-40 disabled:cursor-not-allowed", style: { minHeight: 52 }, children: "Come\u00E7ar" })] }) }));
 }
 export function SelectionFlowPage() {
     const navigate = useNavigate();
     const { videoRef, isReady, isLoading, error, start } = useWebcam();
     const { faceLandmarkerRef } = useFaceMesh();
     const { faceMeshReady, faceDetected } = useCameraStore();
-    const { config, updateLipstick, updateFoundation, updateContour, updateBlush } = useMakeupStore();
-    const { clientName, stepIndex, setClientName, confirmStep, nextStep, } = useOrderStore();
+    const { config, updateLipstick, updateFoundation, updateConcealer, updateBlush } = useMakeupStore();
+    const { clientName, stepIndex, setClientName, setWhatsapp, confirmStep, nextStep, } = useOrderStore();
     const currentStep = STEPS[stepIndex];
     // Products for the current step
     const stepProducts = currentStep
@@ -86,8 +93,8 @@ export function SelectionFlowPage() {
     const applyColor = useCallback((color, opacity) => {
         if (!currentStep)
             return;
-        applyStepColor(color, opacity, updateLipstick, updateFoundation, updateContour, updateBlush, currentStep);
-    }, [currentStep, updateLipstick, updateFoundation, updateContour, updateBlush]);
+        applyStepColor(color, opacity, updateLipstick, updateFoundation, updateConcealer, updateBlush, currentStep);
+    }, [currentStep, updateLipstick, updateFoundation, updateConcealer, updateBlush]);
     useEffect(() => {
         if (!currentStep || !selectedColor)
             return;
@@ -126,7 +133,7 @@ export function SelectionFlowPage() {
                     height: 1,
                     opacity: 0,
                     pointerEvents: 'none',
-                }, "aria-hidden": "true" }), _jsx(AnimatePresence, { children: !clientName && (_jsx(NameModal, { onConfirm: (name) => setClientName(name) })) }), _jsxs("div", { className: "hidden lg:flex h-full overflow-hidden", children: [_jsx("div", { className: "flex-1 flex items-center justify-center p-4 relative min-w-0", children: isReady ? (_jsx(motion.div, { initial: { opacity: 0, scale: 0.97 }, animate: { opacity: 1, scale: 1 }, className: "relative w-full h-full max-h-full", children: _jsx("div", { className: "relative w-full h-full", children: _jsx(TryOnCanvas, { videoRef: videoRef, faceLandmarkerRef: faceLandmarkerRef, config: config, showBeforeAfter: false, showDebug: false, faceMeshReady: faceMeshReady, faceDetected: faceDetected }) }) })) : (_jsx("div", { className: "w-full max-w-2xl aspect-[4/3] glass-panel rounded-2xl overflow-hidden", children: _jsx(CameraPermission, { status: cameraStatus, error: error, onStart: start }) })) }), _jsxs("div", { className: "w-80 xl:w-96 flex-shrink-0 flex flex-col overflow-hidden border-l", style: {
+                }, "aria-hidden": "true" }), _jsx(AnimatePresence, { children: !clientName && (_jsx(NameModal, { onConfirm: (name, phone) => { setClientName(name); setWhatsapp(phone); } })) }), _jsxs("div", { className: "hidden lg:flex h-full overflow-hidden", children: [_jsx("div", { className: "flex-1 flex items-center justify-center p-4 relative min-w-0", children: isReady ? (_jsx(motion.div, { initial: { opacity: 0, scale: 0.97 }, animate: { opacity: 1, scale: 1 }, className: "relative w-full h-full max-h-full", children: _jsx("div", { className: "relative w-full h-full", children: _jsx(TryOnCanvas, { videoRef: videoRef, faceLandmarkerRef: faceLandmarkerRef, config: config, showBeforeAfter: false, showDebug: false, faceMeshReady: faceMeshReady, faceDetected: faceDetected }) }) })) : (_jsx("div", { className: "w-full max-w-2xl aspect-[4/3] glass-panel rounded-2xl overflow-hidden", children: _jsx(CameraPermission, { status: cameraStatus, error: error, onStart: start }) })) }), _jsxs("div", { className: "w-80 xl:w-96 flex-shrink-0 flex flex-col overflow-hidden border-l", style: {
                             background: '#0F1022',
                             borderColor: 'rgba(255,255,255,0.07)',
                         }, children: [_jsxs("div", { className: "p-5 border-b", style: { borderColor: 'rgba(255,255,255,0.07)' }, children: [_jsxs("div", { className: "flex items-center justify-between mb-4", children: [_jsx("h1", { className: "text-sm font-semibold text-white/60 uppercase tracking-widest", children: "Seu Look" }), clientName && (_jsx("span", { className: "text-xs text-pink-400 font-medium", children: clientName }))] }), _jsx("div", { className: "flex gap-2", children: STEPS.map((step, idx) => {

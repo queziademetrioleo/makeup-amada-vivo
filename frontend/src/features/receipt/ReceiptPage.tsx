@@ -6,7 +6,7 @@ import { createOrder } from '@/lib/orders';
 
 export function ReceiptPage() {
   const navigate = useNavigate();
-  const { clientName, selections, setOrder, reset } = useOrderStore();
+  const { clientName, whatsapp, selections, setOrder, reset } = useOrderStore();
   const [isLoading, setIsLoading] = useState(false);
   const [loadingError, setLoadingError] = useState<string | null>(null);
 
@@ -22,7 +22,7 @@ export function ReceiptPage() {
     setIsLoading(true);
     setLoadingError(null);
     try {
-      const { orderId, queuePosition } = await createOrder(clientName, selections);
+      const { orderId, queuePosition } = await createOrder(clientName, whatsapp, selections);
       setOrder(orderId, queuePosition);
       navigate(`/fila/${orderId}`);
     } catch (err) {

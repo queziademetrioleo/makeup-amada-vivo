@@ -10,15 +10,17 @@ const LAYER_LABELS = {
     contour: 'Contorno',
     foundation: 'Base',
     brows: 'Sobrancelha',
+    concealer: 'Corretivo',
 };
 function IntensityBar() {
-    const { config, activeLayer, updateLipstick, updateBlush, updateContour, updateFoundation, updateBrows, } = useMakeupStore();
+    const { config, activeLayer, updateLipstick, updateBlush, updateContour, updateFoundation, updateBrows, updateConcealer, } = useMakeupStore();
     const opacityMap = {
         lipstick: config.lipstick.opacity,
         blush: config.blush.opacity,
         contour: config.contour.opacity,
         foundation: config.foundation.opacity,
         brows: config.brows.opacity,
+        concealer: config.concealer.opacity,
     };
     const enabledMap = {
         lipstick: config.lipstick.enabled,
@@ -26,6 +28,7 @@ function IntensityBar() {
         contour: config.contour.enabled,
         foundation: config.foundation.enabled,
         brows: config.brows.enabled,
+        concealer: config.concealer.enabled,
     };
     const updateMap = {
         lipstick: (opacity) => updateLipstick({ opacity }),
@@ -33,6 +36,7 @@ function IntensityBar() {
         contour: (opacity) => updateContour({ opacity }),
         foundation: (opacity) => updateFoundation({ opacity }),
         brows: (opacity) => updateBrows({ opacity }),
+        concealer: (opacity) => updateConcealer({ opacity }),
     };
     const opacity = opacityMap[activeLayer];
     const enabled = enabledMap[activeLayer];

@@ -39,7 +39,7 @@ function applyStepColor(
   opacity: number,
   updateLipstick: (p: object) => void,
   updateFoundation: (p: object) => void,
-  updateContour: (p: object) => void,
+  updateConcealer: (p: object) => void,
   updateBlush: (p: object) => void,
   step?: SelectionStep,
 ) {
@@ -51,7 +51,7 @@ function applyStepColor(
       updateFoundation({ color, opacity, enabled: true });
       break;
     case 'corretivo':
-      updateContour({ color, opacity, enabled: true });
+      updateConcealer({ color, opacity, enabled: true });
       break;
     case 'blush':
       updateBlush({ color, opacity, enabled: true });
@@ -60,11 +60,14 @@ function applyStepColor(
 }
 
 interface NameModalProps {
-  onConfirm: (name: string) => void;
+  onConfirm: (name: string, whatsapp: string) => void;
 }
 
 function NameModal({ onConfirm }: NameModalProps) {
-  const [value, setValue] = useState('');
+  const [name, setName] = useState('');
+  const [whatsapp, setWhatsapp] = useState('');
+
+  const canSubmit = name.trim() && whatsapp.trim();
 
   return (
     <motion.div
@@ -96,11 +99,8 @@ function NameModal({ onConfirm }: NameModalProps) {
         <label className="block text-sm text-white/60 mb-2">Qual é o seu nome?</label>
         <input
           type="text"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && value.trim()) onConfirm(value.trim());
-          }}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           placeholder="Digite seu nome..."
           autoFocus
           className="w-full mb-4 px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/30"
@@ -111,9 +111,26 @@ function NameModal({ onConfirm }: NameModalProps) {
             minHeight: 48,
           }}
         />
+        <label className="block text-sm text-white/60 mb-2">WhatsApp</label>
+        <input
+          type="tel"
+          value={whatsapp}
+          onChange={(e) => setWhatsapp(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && canSubmit) onConfirm(name.trim(), whatsapp.trim());
+          }}
+          placeholder="(DDD) 9 9999-9999"
+          className="w-full mb-6 px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/30"
+          style={{
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.10)',
+            borderRadius: 14,
+            minHeight: 48,
+          }}
+        />
         <button
-          disabled={!value.trim()}
-          onClick={() => { if (value.trim()) onConfirm(value.trim()); }}
+          disabled={!canSubmit}
+          onClick={() => { if (canSubmit) onConfirm(name.trim(), whatsapp.trim()); }}
           className="btn-gradient w-full text-white font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
           style={{ minHeight: 52 }}
         >
@@ -129,11 +146,12 @@ export function SelectionFlowPage() {
   const { videoRef, isReady, isLoading, error, start } = useWebcam();
   const { faceLandmarkerRef } = useFaceMesh();
   const { faceMeshReady, faceDetected } = useCameraStore();
-  const { config, updateLipstick, updateFoundation, updateContour, updateBlush } = useMakeupStore();
+  const { config, updateLipstick, updateFoundation, updateConcealer, updateBlush } = useMakeupStore();
   const {
     clientName,
     stepIndex,
     setClientName,
+    setWhatsapp,
     confirmStep,
     nextStep,
   } = useOrderStore();
@@ -167,8 +185,8 @@ export function SelectionFlowPage() {
   // Apply color + intensity whenever any of these change
   const applyColor = useCallback((color: string, opacity: number) => {
     if (!currentStep) return;
-    applyStepColor(color, opacity, updateLipstick, updateFoundation, updateContour, updateBlush, currentStep);
-  }, [currentStep, updateLipstick, updateFoundation, updateContour, updateBlush]);
+    applyStepColor(color, opacity, updateLipstick, updateFoundation, updateConcealer, updateBlush, currentStep);
+  }, [currentStep, updateLipstick, updateFoundation, updateConcealer, updateBlush]);
 
   useEffect(() => {
     if (!currentStep || !selectedColor) return;
@@ -226,7 +244,7 @@ export function SelectionFlowPage() {
       {/* Name modal */}
       <AnimatePresence>
         {!clientName && (
-          <NameModal onConfirm={(name) => setClientName(name)} />
+          <NameModal onConfirm={(name, phone) => { setClientName(name); setWhatsapp(phone); }} />
         )}
       </AnimatePresence>
 

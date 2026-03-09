@@ -4,12 +4,13 @@ import type { MakeupPreset } from '@/types/presets';
 const defaultSkinSmooth = { enabled: false, intensity: 0.5 };
 
 export const DEFAULT_MAKEUP: MakeupConfig = {
-  lipstick:    { enabled: true,  color: '#C47B8A', opacity: 0.75, glossy: true },
-  blush:       { enabled: true,  color: '#E8A0A8', opacity: 0.45 },
-  contour:     { enabled: false, color: '#8B6B5A', opacity: 0.35 },
-  foundation:  { enabled: false, color: '#E8C9B0', opacity: 0.3  },
-  brows:       { enabled: false, color: '#5A3D2B', opacity: 0.5  },
-  skinSmooth:  defaultSkinSmooth,
+  lipstick:   { enabled: true,  color: '#C47B8A', opacity: 0.75, glossy: true },
+  blush:      { enabled: true,  color: '#E8A0A8', opacity: 0.45 },
+  contour:    { enabled: false, color: '#8B6B5A', opacity: 0.35 },
+  foundation: { enabled: false, color: '#E8C9B0', opacity: 0.3  },
+  brows:      { enabled: false, color: '#5A3D2B', opacity: 0.5  },
+  concealer:  { enabled: false, color: '#F5E4D0', opacity: 0.75 },
+  skinSmooth: defaultSkinSmooth,
 };
 
 export const PRESETS: MakeupPreset[] = [
@@ -26,6 +27,7 @@ export const PRESETS: MakeupPreset[] = [
       contour:    { enabled: true,  color: '#9A7060', opacity: 0.25 },
       foundation: { enabled: true,  color: '#ECCDB0', opacity: 0.25 },
       brows:      { enabled: true,  color: '#6B4B3E', opacity: 0.5  },
+      concealer:  { enabled: false, color: '#F5E4D0', opacity: 0.75 },
       skinSmooth: defaultSkinSmooth,
     },
   },
@@ -42,6 +44,7 @@ export const PRESETS: MakeupPreset[] = [
       contour:    { enabled: true,  color: '#7A4855', opacity: 0.4  },
       foundation: { enabled: false, color: '#E8C9B0', opacity: 0.2  },
       brows:      { enabled: true,  color: '#3D1F2A', opacity: 0.7  },
+      concealer:  { enabled: false, color: '#F5E4D0', opacity: 0.75 },
       skinSmooth: defaultSkinSmooth,
     },
   },
@@ -58,6 +61,7 @@ export const PRESETS: MakeupPreset[] = [
       contour:    { enabled: false, color: '#8B6050', opacity: 0.3  },
       foundation: { enabled: false, color: '#F0D0B0', opacity: 0.2  },
       brows:      { enabled: true,  color: '#7A5038', opacity: 0.55 },
+      concealer:  { enabled: false, color: '#F5E4D0', opacity: 0.75 },
       skinSmooth: defaultSkinSmooth,
     },
   },
@@ -74,6 +78,7 @@ export const PRESETS: MakeupPreset[] = [
       contour:    { enabled: true,  color: '#885040', opacity: 0.35 },
       foundation: { enabled: false, color: '#E8C8A8', opacity: 0.2  },
       brows:      { enabled: true,  color: '#4A2820', opacity: 0.65 },
+      concealer:  { enabled: false, color: '#F5E4D0', opacity: 0.75 },
       skinSmooth: defaultSkinSmooth,
     },
   },
@@ -90,6 +95,7 @@ export const PRESETS: MakeupPreset[] = [
       contour:    { enabled: true,  color: '#A08070', opacity: 0.2  },
       foundation: { enabled: true,  color: '#F0D8C0', opacity: 0.3  },
       brows:      { enabled: true,  color: '#8A6558', opacity: 0.45 },
+      concealer:  { enabled: false, color: '#F5E4D0', opacity: 0.75 },
       skinSmooth: { enabled: true, intensity: 0.55 },
     },
   },
@@ -106,6 +112,7 @@ export const PRESETS: MakeupPreset[] = [
       contour:    { enabled: true,  color: '#906040', opacity: 0.45 },
       foundation: { enabled: true,  color: '#E8C090', opacity: 0.28 },
       brows:      { enabled: true,  color: '#6B4020', opacity: 0.6  },
+      concealer:  { enabled: false, color: '#F5E4D0', opacity: 0.75 },
       skinSmooth: { enabled: true, intensity: 0.4 },
     },
   },

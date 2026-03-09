@@ -14,11 +14,13 @@ export const STEP_DESCRIPTIONS = {
 };
 export const useOrderStore = create((set) => ({
     clientName: '',
+    whatsapp: '',
     stepIndex: 0,
     selections: {},
     orderId: null,
     queuePosition: null,
     setClientName: (name) => set({ clientName: name }),
+    setWhatsapp: (phone) => set({ whatsapp: phone }),
     confirmStep: (selection) => set((state) => ({
         selections: {
             ...state.selections,
@@ -29,6 +31,7 @@ export const useOrderStore = create((set) => ({
     setOrder: (orderId, position) => set({ orderId, queuePosition: position }),
     reset: () => set({
         clientName: '',
+        whatsapp: '',
         stepIndex: 0,
         selections: {},
         orderId: null,

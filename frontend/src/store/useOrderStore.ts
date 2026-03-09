@@ -28,12 +28,14 @@ export const STEP_DESCRIPTIONS: Record<SelectionStep, string> = {
 
 interface OrderState {
   clientName: string;
+  whatsapp: string;
   stepIndex: number;
   selections: Partial<Record<SelectionStep, StepSelection>>;
   orderId: string | null;
   queuePosition: number | null;
 
   setClientName: (name: string) => void;
+  setWhatsapp: (phone: string) => void;
   confirmStep: (selection: StepSelection) => void;
   nextStep: () => void;
   setOrder: (orderId: string, position: number) => void;
@@ -42,12 +44,14 @@ interface OrderState {
 
 export const useOrderStore = create<OrderState>((set) => ({
   clientName: '',
+  whatsapp: '',
   stepIndex: 0,
   selections: {},
   orderId: null,
   queuePosition: null,
 
   setClientName: (name) => set({ clientName: name }),
+  setWhatsapp: (phone) => set({ whatsapp: phone }),
 
   confirmStep: (selection) =>
     set((state) => ({
@@ -64,6 +68,7 @@ export const useOrderStore = create<OrderState>((set) => ({
   reset: () =>
     set({
       clientName: '',
+      whatsapp: '',
       stepIndex: 0,
       selections: {},
       orderId: null,
