@@ -76,12 +76,18 @@ function NameModal({ onConfirm }: NameModalProps) {
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-        className="bg-[#161829] border border-white/10 rounded-2xl p-8 w-full max-w-sm shadow-2xl"
+        className="glass-card p-8 w-full max-w-sm shadow-2xl"
       >
-        <div className="w-12 h-12 rounded-full bg-[#E8809A]/20 border border-[#E8809A]/30 flex items-center justify-center mb-6 mx-auto">
+        <div
+          className="w-12 h-12 rounded-full flex items-center justify-center mb-6 mx-auto"
+          style={{ background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)' }}
+        >
           <span className="text-xl">💄</span>
         </div>
-        <h2 className="text-xl font-semibold text-white text-center mb-2">
+        <h2
+          className="text-2xl font-bold text-white text-center mb-2"
+          style={{ fontFamily: "'Playfair Display', serif" }}
+        >
           Bem-vinda ao Try-On Guiado
         </h2>
         <p className="text-white/50 text-sm text-center mb-6">
@@ -97,13 +103,19 @@ function NameModal({ onConfirm }: NameModalProps) {
           }}
           placeholder="Digite seu nome..."
           autoFocus
-          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-[#E8809A]/50 focus:ring-1 focus:ring-[#E8809A]/30 mb-4"
+          className="w-full mb-4 px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/30"
+          style={{
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.10)',
+            borderRadius: 14,
+            minHeight: 48,
+          }}
         />
         <button
           disabled={!value.trim()}
           onClick={() => { if (value.trim()) onConfirm(value.trim()); }}
-          className="w-full py-3 rounded-xl font-semibold text-white transition-all
-            bg-[#E8809A] hover:bg-[#E8809A]/90 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="btn-gradient w-full text-white font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{ minHeight: 52 }}
         >
           Começar
         </button>
@@ -192,11 +204,8 @@ export function SelectionFlowPage() {
   const cameraStatus = isLoading ? 'requesting' : error ? 'error' : 'idle';
 
   return (
-    <div className="fixed inset-0 bg-[#080910] flex overflow-hidden">
-      {/*
-        Hidden video element — must stay in DOM always (same pattern as TryOnPage).
-        Placing it off-screen prevents React from unmounting/remounting it.
-      */}
+    <div className="fixed inset-0 bg-[#080910] overflow-hidden">
+      {/* Hidden video element */}
       <video
         ref={videoRef}
         autoPlay
@@ -221,16 +230,231 @@ export function SelectionFlowPage() {
         )}
       </AnimatePresence>
 
-      {/* Camera / canvas area (left) */}
-      <div className="flex-1 flex items-center justify-center p-4 relative min-w-0">
-        {isReady ? (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.97 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="relative w-full h-full max-h-full"
-            style={{ aspectRatio: undefined }}
-          >
-            <div className="relative w-full h-full">
+      {/* ── Desktop layout (lg+): camera left, sidebar right ── */}
+      <div className="hidden lg:flex h-full overflow-hidden">
+        {/* Camera area */}
+        <div className="flex-1 flex items-center justify-center p-4 relative min-w-0">
+          {isReady ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="relative w-full h-full max-h-full"
+            >
+              <div className="relative w-full h-full">
+                <TryOnCanvas
+                  videoRef={videoRef}
+                  faceLandmarkerRef={faceLandmarkerRef}
+                  config={config}
+                  showBeforeAfter={false}
+                  showDebug={false}
+                  faceMeshReady={faceMeshReady}
+                  faceDetected={faceDetected}
+                />
+              </div>
+            </motion.div>
+          ) : (
+            <div className="w-full max-w-2xl aspect-[4/3] glass-panel rounded-2xl overflow-hidden">
+              <CameraPermission
+                status={cameraStatus}
+                error={error}
+                onStart={start}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Sidebar */}
+        <div
+          className="w-80 xl:w-96 flex-shrink-0 flex flex-col overflow-hidden border-l"
+          style={{
+            background: '#0F1022',
+            borderColor: 'rgba(255,255,255,0.07)',
+          }}
+        >
+          {/* Step progress header */}
+          <div className="p-5 border-b" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
+            <div className="flex items-center justify-between mb-4">
+              <h1
+                className="text-sm font-semibold text-white/60 uppercase tracking-widest"
+              >
+                Seu Look
+              </h1>
+              {clientName && (
+                <span className="text-xs text-pink-400 font-medium">{clientName}</span>
+              )}
+            </div>
+
+            {/* Step pills */}
+            <div className="flex gap-2">
+              {STEPS.map((step, idx) => {
+                const isDone = idx < stepIndex;
+                const isCurrent = idx === stepIndex;
+                return (
+                  <div key={step} className="flex-1 flex flex-col items-center gap-1">
+                    <div
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all"
+                      style={
+                        isDone
+                          ? { background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)', color: 'white' }
+                          : isCurrent
+                            ? { background: 'rgba(236,72,153,0.15)', border: '2px solid #EC4899', color: '#EC4899' }
+                            : { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.3)' }
+                      }
+                    >
+                      {isDone ? '✓' : idx + 1}
+                    </div>
+                    <span
+                      className="text-[10px] font-medium transition-colors"
+                      style={{ color: isCurrent ? '#EC4899' : isDone ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.2)' }}
+                    >
+                      {STEP_LABELS[step]}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Current step content */}
+          <AnimatePresence mode="wait">
+            {currentStep && (
+              <motion.div
+                key={currentStep}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
+                className="flex-1 overflow-y-auto flex flex-col"
+              >
+                {/* Step title */}
+                <div className="px-5 pt-5 pb-3">
+                  <h2
+                    className="text-xl font-bold text-white"
+                    style={{ fontFamily: "'Playfair Display', serif" }}
+                  >
+                    {STEP_LABELS[currentStep]}
+                  </h2>
+                  <p className="text-sm text-white/40 mt-0.5">
+                    {STEP_DESCRIPTIONS[currentStep]}
+                  </p>
+                </div>
+
+                {/* Product selector */}
+                {stepProducts.length > 1 && (
+                  <div className="px-5 pb-3">
+                    <p className="text-xs text-white/40 mb-2 uppercase tracking-wider">Produto</p>
+                    <div className="flex flex-col gap-1.5">
+                      {stepProducts.map((product, pIdx) => (
+                        <button
+                          key={product.id}
+                          onClick={() => {
+                            setSelectedProductIndex(pIdx);
+                            setSelectedColorIndex(0);
+                          }}
+                          className="w-full text-left px-3 py-2.5 rounded-xl border transition-all text-sm"
+                          style={
+                            selectedProductIndex === pIdx
+                              ? { background: 'rgba(236,72,153,0.10)', borderColor: 'rgba(236,72,153,0.40)', color: 'white' }
+                              : { background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)' }
+                          }
+                        >
+                          <div className="font-medium">{product.name}</div>
+                          <div className="text-xs text-white/40 mt-0.5">{product.brand} · R$ {product.price.toFixed(2).replace('.', ',')}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Single product */}
+                {stepProducts.length === 1 && selectedProduct && (
+                  <div className="px-5 pb-3">
+                    <div className="px-3 py-2.5 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                      <div className="text-sm font-medium text-white">{selectedProduct.name}</div>
+                      <div className="text-xs text-white/40 mt-0.5">{selectedProduct.brand} · R$ {selectedProduct.price.toFixed(2).replace('.', ',')}</div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Color grid */}
+                {selectedProduct && (
+                  <div className="px-5 pb-4">
+                    <p className="text-xs text-white/40 mb-3 uppercase tracking-wider">Cor</p>
+                    <div className="grid grid-cols-4 gap-2">
+                      {selectedProduct.colors.map((color, cIdx) => (
+                        <button
+                          key={color.id}
+                          onClick={() => setSelectedColorIndex(cIdx)}
+                          title={color.name}
+                          className="flex flex-col items-center gap-1.5 group"
+                        >
+                          <div
+                            className="w-12 h-12 rounded-full transition-all shadow-md"
+                            style={{
+                              backgroundColor: color.hex,
+                              ...(selectedColorIndex === cIdx
+                                ? { outline: '2px solid #EC4899', outlineOffset: 2, transform: 'scale(1.10)', boxShadow: '0 0 12px rgba(236,72,153,0.5)' }
+                                : {}),
+                            }}
+                          />
+                          <span
+                            className="text-[9px] text-center leading-tight transition-colors"
+                            style={{ color: selectedColorIndex === cIdx ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.3)' }}
+                          >
+                            {color.name}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Selected color preview */}
+                {selectedColor && (
+                  <div className="px-5 pb-4">
+                    <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                      <div
+                        className="w-8 h-8 rounded-full flex-shrink-0 shadow-sm"
+                        style={{ backgroundColor: selectedColor.hex, border: '1px solid rgba(255,255,255,0.1)' }}
+                      />
+                      <div>
+                        <div className="text-sm text-white font-medium">{selectedColor.name}</div>
+                        <div className="text-xs text-white/40">{selectedColor.hex}</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex-1" />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Bottom action */}
+          <div className="p-5 border-t" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
+            <button
+              onClick={handleChoose}
+              disabled={!selectedColor || !currentStep}
+              className="btn-gradient w-full text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{ minHeight: 52 }}
+            >
+              {currentStep ? `Escolher ${STEP_LABELS[currentStep]}` : 'Escolher'}
+            </button>
+            {stepIndex > 0 && (
+              <p className="text-center text-xs text-white/30 mt-2">
+                Passo {stepIndex + 1} de {STEPS.length}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Mobile layout (< lg): camera full screen + bottom sheet ── */}
+      <div className="lg:hidden flex flex-col h-full">
+        {/* Camera takes all remaining height */}
+        <div className="flex-1 relative min-h-0">
+          {isReady ? (
+            <div className="absolute inset-0">
               <TryOnCanvas
                 videoRef={videoRef}
                 faceLandmarkerRef={faceLandmarkerRef}
@@ -241,90 +465,98 @@ export function SelectionFlowPage() {
                 faceDetected={faceDetected}
               />
             </div>
-          </motion.div>
-        ) : (
-          <div className="w-full max-w-2xl aspect-[4/3] glass-panel rounded-2xl overflow-hidden">
-            <CameraPermission
-              status={cameraStatus}
-              error={error}
-              onStart={start}
-            />
-          </div>
-        )}
-      </div>
+          ) : (
+            <div className="absolute inset-0">
+              <CameraPermission
+                status={cameraStatus}
+                error={error}
+                onStart={start}
+              />
+            </div>
+          )}
 
-      {/* Sidebar (right) */}
-      <div className="w-80 xl:w-96 flex-shrink-0 bg-[#0D0E1C] border-l border-white/5 flex flex-col overflow-hidden">
-        {/* Step progress header */}
-        <div className="p-5 border-b border-white/5">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-sm font-semibold text-white/60 uppercase tracking-widest">
-              Seu Look
-            </h1>
+          {/* Step progress bar overlay at top */}
+          <div
+            className="absolute top-0 left-0 right-0 z-10 flex items-center px-4 gap-3"
+            style={{
+              height: 52,
+              background: 'rgba(8,9,16,0.65)',
+              backdropFilter: 'blur(12px)',
+              borderBottom: '1px solid rgba(255,255,255,0.07)',
+            }}
+          >
             {clientName && (
-              <span className="text-xs text-[#E8809A] font-medium">{clientName}</span>
+              <span className="text-xs text-pink-400 font-medium mr-1 flex-shrink-0">{clientName}</span>
             )}
-          </div>
-
-          {/* Step pills */}
-          <div className="flex gap-2">
-            {STEPS.map((step, idx) => {
-              const isDone = idx < stepIndex;
-              const isCurrent = idx === stepIndex;
-              return (
-                <div
-                  key={step}
-                  className={`flex-1 flex flex-col items-center gap-1`}
-                >
-                  <div
-                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all
-                      ${isDone
-                        ? 'bg-[#E8809A] text-white'
-                        : isCurrent
-                          ? 'bg-[#E8809A]/20 border-2 border-[#E8809A] text-[#E8809A]'
-                          : 'bg-white/5 border border-white/10 text-white/30'
-                      }`}
-                  >
-                    {isDone ? '✓' : idx + 1}
+            <div className="flex gap-2 flex-1">
+              {STEPS.map((step, idx) => {
+                const isDone = idx < stepIndex;
+                const isCurrent = idx === stepIndex;
+                return (
+                  <div key={step} className="flex-1 flex flex-col items-center gap-0.5">
+                    <div
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold transition-all"
+                      style={
+                        isDone
+                          ? { background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)', color: 'white' }
+                          : isCurrent
+                            ? { background: 'rgba(236,72,153,0.15)', border: '2px solid #EC4899', color: '#EC4899' }
+                            : { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.3)' }
+                      }
+                    >
+                      {isDone ? '✓' : idx + 1}
+                    </div>
+                    <span
+                      className="text-[8px] font-medium"
+                      style={{ color: isCurrent ? '#EC4899' : isDone ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.2)' }}
+                    >
+                      {STEP_LABELS[step]}
+                    </span>
                   </div>
-                  <span
-                    className={`text-[10px] font-medium transition-colors
-                      ${isCurrent ? 'text-[#E8809A]' : isDone ? 'text-white/50' : 'text-white/20'}`}
-                  >
-                    {STEP_LABELS[step]}
-                  </span>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
 
-        {/* Current step content */}
+        {/* Bottom sheet — always visible, ~50% height */}
         <AnimatePresence mode="wait">
           {currentStep && (
             <motion.div
               key={currentStep}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
-              className="flex-1 overflow-y-auto flex flex-col"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.22 }}
+              className="flex-shrink-0 flex flex-col"
+              style={{
+                height: '50%',
+                background: 'rgba(15,16,34,0.95)',
+                backdropFilter: 'blur(20px)',
+                borderTop: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: '24px 24px 0 0',
+              }}
             >
-              {/* Step title */}
-              <div className="px-5 pt-5 pb-3">
-                <h2 className="text-lg font-semibold text-white">
-                  {STEP_LABELS[currentStep]}
-                </h2>
-                <p className="text-sm text-white/40 mt-0.5">
-                  {STEP_DESCRIPTIONS[currentStep]}
-                </p>
+              {/* Sheet handle */}
+              <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
+                <div className="w-10 h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.15)' }} />
               </div>
 
-              {/* Product selector */}
+              {/* Step title */}
+              <div className="px-5 pt-1 pb-2 flex-shrink-0">
+                <h2
+                  className="text-lg font-bold text-white"
+                  style={{ fontFamily: "'Playfair Display', serif" }}
+                >
+                  {STEP_LABELS[currentStep]}
+                </h2>
+                <p className="text-xs text-white/40">{STEP_DESCRIPTIONS[currentStep]}</p>
+              </div>
+
+              {/* Product horizontal scroll chips */}
               {stepProducts.length > 1 && (
-                <div className="px-5 pb-3">
-                  <p className="text-xs text-white/40 mb-2 uppercase tracking-wider">Produto</p>
-                  <div className="flex flex-col gap-1.5">
+                <div className="flex-shrink-0 px-5 pb-2">
+                  <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
                     {stepProducts.map((product, pIdx) => (
                       <button
                         key={product.id}
@@ -332,101 +564,67 @@ export function SelectionFlowPage() {
                           setSelectedProductIndex(pIdx);
                           setSelectedColorIndex(0);
                         }}
-                        className={`w-full text-left px-3 py-2.5 rounded-xl border transition-all text-sm
-                          ${selectedProductIndex === pIdx
-                            ? 'bg-[#E8809A]/10 border-[#E8809A]/40 text-white'
-                            : 'bg-white/3 border-white/8 text-white/60 hover:border-white/20 hover:text-white/80'
-                          }`}
+                        className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap"
+                        style={
+                          selectedProductIndex === pIdx
+                            ? { background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)', color: 'white' }
+                            : { background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.6)' }
+                        }
                       >
-                        <div className="font-medium">{product.name}</div>
-                        <div className="text-xs text-white/40 mt-0.5">{product.brand} · R$ {product.price.toFixed(2).replace('.', ',')}</div>
+                        {product.name}
                       </button>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Single product (no selector needed) */}
-              {stepProducts.length === 1 && selectedProduct && (
-                <div className="px-5 pb-3">
-                  <div className="bg-white/3 border border-white/8 rounded-xl px-3 py-2.5">
-                    <div className="text-sm font-medium text-white">{selectedProduct.name}</div>
-                    <div className="text-xs text-white/40 mt-0.5">{selectedProduct.brand} · R$ {selectedProduct.price.toFixed(2).replace('.', ',')}</div>
-                  </div>
-                </div>
-              )}
-
-              {/* Color grid */}
-              {selectedProduct && (
-                <div className="px-5 pb-4">
-                  <p className="text-xs text-white/40 mb-3 uppercase tracking-wider">Cor</p>
-                  <div className="grid grid-cols-4 gap-2">
+              {/* Color grid — scrollable */}
+              <div className="flex-1 overflow-y-auto px-5 pb-2">
+                {selectedProduct && (
+                  <div className="grid grid-cols-5 gap-2">
                     {selectedProduct.colors.map((color, cIdx) => (
                       <button
                         key={color.id}
                         onClick={() => setSelectedColorIndex(cIdx)}
                         title={color.name}
-                        className={`flex flex-col items-center gap-1.5 group`}
+                        className="flex flex-col items-center gap-1 group"
+                        style={{ minHeight: 48 }}
                       >
                         <div
-                          className={`w-10 h-10 rounded-full transition-all shadow-md
-                            ${selectedColorIndex === cIdx
-                              ? 'ring-2 ring-[#E8809A] ring-offset-2 ring-offset-[#0D0E1C] scale-110'
-                              : 'ring-1 ring-white/10 group-hover:ring-white/30 group-hover:scale-105'
-                            }`}
-                          style={{ backgroundColor: color.hex }}
+                          className="w-14 h-14 rounded-full transition-all shadow-md"
+                          style={{
+                            backgroundColor: color.hex,
+                            ...(selectedColorIndex === cIdx
+                              ? { outline: '2px solid #EC4899', outlineOffset: 2, transform: 'scale(1.08)', boxShadow: '0 0 14px rgba(236,72,153,0.55)' }
+                              : {}),
+                          }}
                         />
                         <span
-                          className={`text-[9px] text-center leading-tight transition-colors
-                            ${selectedColorIndex === cIdx ? 'text-white/80' : 'text-white/30 group-hover:text-white/50'}`}
+                          className="text-[8px] text-center leading-tight"
+                          style={{ color: selectedColorIndex === cIdx ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.3)' }}
                         >
                           {color.name}
                         </span>
                       </button>
                     ))}
                   </div>
-                </div>
-              )}
+                )}
+              </div>
 
-              {/* Selected color preview */}
-              {selectedColor && (
-                <div className="px-5 pb-4">
-                  <div className="flex items-center gap-3 bg-white/3 border border-white/8 rounded-xl px-3 py-2.5">
-                    <div
-                      className="w-8 h-8 rounded-full flex-shrink-0 shadow-sm ring-1 ring-white/10"
-                      style={{ backgroundColor: selectedColor.hex }}
-                    />
-                    <div>
-                      <div className="text-sm text-white font-medium">{selectedColor.name}</div>
-                      <div className="text-xs text-white/40">{selectedColor.hex}</div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Spacer */}
-              <div className="flex-1" />
+              {/* Choose button */}
+              <div className="flex-shrink-0 px-5 pb-5 pt-2">
+                <button
+                  onClick={handleChoose}
+                  disabled={!selectedColor}
+                  className="btn-gradient w-full text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={{ minHeight: 52 }}
+                >
+                  {currentStep ? `Escolher ${STEP_LABELS[currentStep]}` : 'Escolher'}
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Bottom action */}
-        <div className="p-5 border-t border-white/5">
-          <button
-            onClick={handleChoose}
-            disabled={!selectedColor || !currentStep}
-            className="w-full py-3.5 rounded-xl font-semibold text-white text-base transition-all
-              bg-[#E8809A] hover:bg-[#E8809A]/90 active:scale-98 disabled:opacity-40 disabled:cursor-not-allowed
-              shadow-lg shadow-[#E8809A]/20"
-          >
-            {currentStep ? `Escolher ${STEP_LABELS[currentStep]}` : 'Escolher'}
-          </button>
-          {stepIndex > 0 && (
-            <p className="text-center text-xs text-white/30 mt-2">
-              Passo {stepIndex + 1} de {STEPS.length}
-            </p>
-          )}
-        </div>
       </div>
     </div>
   );

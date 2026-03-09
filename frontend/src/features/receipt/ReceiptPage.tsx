@@ -35,12 +35,16 @@ export function ReceiptPage() {
   const filledSteps = STEPS.filter((step) => selections[step]);
 
   return (
-    <div className="min-h-dvh bg-[#080910] flex flex-col">
+    <div className="min-h-dvh flex flex-col" style={{ background: '#080910' }}>
       {/* Top bar */}
-      <div className="h-14 flex items-center px-6 border-b border-white/5 flex-shrink-0">
+      <div
+        className="h-14 flex items-center px-6 flex-shrink-0 border-b"
+        style={{ borderColor: 'rgba(255,255,255,0.07)' }}
+      >
         <button
           onClick={() => navigate('/selecao')}
           className="text-white/40 hover:text-white/70 transition-colors flex items-center gap-2 text-sm"
+          style={{ minHeight: 44 }}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -59,17 +63,27 @@ export function ReceiptPage() {
           >
             {/* Header */}
             <div className="text-center mb-8">
-              <div className="w-16 h-16 rounded-full bg-[#E8809A]/20 border border-[#E8809A]/30 flex items-center justify-center mx-auto mb-4">
+              <div
+                className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+                style={{ background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)', boxShadow: '0 8px 32px rgba(236,72,153,0.35)' }}
+              >
                 <span className="text-2xl">💄</span>
               </div>
-              <h1 className="text-2xl font-bold text-white mb-1">Seu Look Completo</h1>
+              <h1
+                className="text-3xl font-bold text-white mb-1"
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
+                Seu Look Completo
+              </h1>
               <p className="text-white/50 text-sm">
-                Olá, <span className="text-[#E8809A] font-medium">{clientName}</span>! Confira suas escolhas.
+                Olá, <span className="text-pink-400 font-medium">{clientName}</span>! Confira suas escolhas.
               </p>
             </div>
 
             {/* Selections card */}
-            <div className="bg-[#161829] border border-white/8 rounded-2xl overflow-hidden mb-6">
+            <div
+              className="glass-card overflow-hidden mb-6"
+            >
               {filledSteps.map((step, idx) => {
                 const sel = selections[step];
                 if (!sel) return null;
@@ -79,19 +93,23 @@ export function ReceiptPage() {
                     initial={{ opacity: 0, x: -12 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: idx * 0.07 }}
-                    className={`flex items-center gap-4 px-5 py-4 ${idx < filledSteps.length - 1 ? 'border-b border-white/5' : ''}`}
+                    className="flex items-center gap-4 px-5 py-4"
+                    style={idx < filledSteps.length - 1 ? { borderBottom: '1px solid rgba(255,255,255,0.06)' } : {}}
                   >
                     {/* Step label */}
                     <div className="w-16 flex-shrink-0">
-                      <span className="text-xs font-semibold text-[#E8809A]/70 uppercase tracking-wider">
+                      <span
+                        className="text-xs font-semibold uppercase tracking-wider"
+                        style={{ color: 'rgba(236,72,153,0.7)' }}
+                      >
                         {STEP_LABELS[step]}
                       </span>
                     </div>
 
                     {/* Color swatch */}
                     <div
-                      className="w-9 h-9 rounded-full flex-shrink-0 shadow-sm ring-1 ring-white/15"
-                      style={{ backgroundColor: sel.colorHex }}
+                      className="w-9 h-9 rounded-full flex-shrink-0 shadow-sm"
+                      style={{ backgroundColor: sel.colorHex, border: '1px solid rgba(255,255,255,0.15)' }}
                     />
 
                     {/* Product + color info */}
@@ -108,7 +126,10 @@ export function ReceiptPage() {
 
             {/* Error */}
             {loadingError && (
-              <div className="mb-4 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-sm text-red-400">
+              <div
+                className="mb-4 px-4 py-3 text-sm text-red-400 rounded-xl"
+                style={{ background: 'rgba(239,68,68,0.10)', border: '1px solid rgba(239,68,68,0.20)' }}
+              >
                 {loadingError}
               </div>
             )}
@@ -120,9 +141,11 @@ export function ReceiptPage() {
               transition={{ delay: 0.3 }}
               onClick={handleEnterQueue}
               disabled={isLoading}
-              className="w-full py-4 rounded-2xl font-bold text-white text-lg transition-all
-                bg-[#E8809A] hover:bg-[#E8809A]/90 active:scale-98 disabled:opacity-60
-                shadow-xl shadow-[#E8809A]/25"
+              className="btn-gradient w-full text-white font-bold text-lg disabled:opacity-60"
+              style={{
+                minHeight: 56,
+                boxShadow: '0 8px 32px rgba(236,72,153,0.35)',
+              }}
             >
               {isLoading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -138,6 +161,7 @@ export function ReceiptPage() {
             <button
               onClick={() => { reset(); navigate('/selecao'); }}
               className="w-full mt-3 py-3 text-sm text-white/30 hover:text-white/50 transition-colors"
+              style={{ minHeight: 48 }}
             >
               Recomeçar seleção
             </button>

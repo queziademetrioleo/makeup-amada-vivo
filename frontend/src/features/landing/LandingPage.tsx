@@ -8,13 +8,13 @@ export function LandingPage() {
     <div
       className="fixed inset-0 flex flex-col items-center justify-center overflow-hidden"
       style={{
-        background: 'radial-gradient(ellipse at 60% 20%, #2D1B4E 0%, #1A0D2E 40%, #0D0816 100%)',
+        background: 'radial-gradient(ellipse at 60% 20%, #2D1B4E 0%, #1A0D2E 40%, #080910 100%)',
       }}
     >
-      {/* Glow de fundo */}
+      {/* Background glow */}
       <div
         className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-3xl opacity-30 pointer-events-none"
-        style={{ background: 'radial-gradient(circle, #C84B8A 0%, #7B2FBE 60%, transparent 100%)' }}
+        style={{ background: 'radial-gradient(circle, #EC4899 0%, #8B5CF6 60%, transparent 100%)' }}
       />
 
       <div className="relative z-10 flex flex-col items-center text-center px-8 gap-6">
@@ -28,14 +28,15 @@ export function LandingPage() {
           Convenção de Vendas 2026
         </motion.p>
 
-        {/* Logo / Título */}
+        {/* Logo / Título — Playfair Display */}
         <motion.h1
           initial={{ opacity: 0, scale: 0.92 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.7, delay: 0.1 }}
           className="text-7xl sm:text-8xl font-bold leading-none"
           style={{
-            background: 'linear-gradient(135deg, #E8809A 0%, #C86DD4 50%, #ffffff 100%)',
+            fontFamily: "'Playfair Display', serif",
+            background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
@@ -64,8 +65,10 @@ export function LandingPage() {
           onClick={() => navigate('/selecao')}
           className="w-24 h-24 rounded-full flex items-center justify-center shadow-2xl"
           style={{
-            background: 'linear-gradient(135deg, #7B2FBE 0%, #C84B8A 100%)',
-            boxShadow: '0 0 40px rgba(200, 75, 138, 0.5)',
+            background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)',
+            boxShadow: '0 0 40px rgba(236,72,153,0.5)',
+            minWidth: 96,
+            minHeight: 96,
           }}
         >
           <svg className="w-10 h-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -73,7 +76,7 @@ export function LandingPage() {
           </svg>
         </motion.button>
 
-        {/* Botão principal */}
+        {/* Botão principal — gradient pill */}
         <motion.button
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -81,10 +84,10 @@ export function LandingPage() {
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
           onClick={() => navigate('/selecao')}
-          className="w-full max-w-xs py-4 rounded-full text-white font-semibold text-lg shadow-2xl"
+          className="btn-gradient w-full max-w-xs px-8 text-white font-semibold text-lg"
           style={{
-            background: 'linear-gradient(90deg, #7B2FBE 0%, #C84B8A 100%)',
-            boxShadow: '0 8px 32px rgba(200, 75, 138, 0.4)',
+            minHeight: 56,
+            boxShadow: '0 8px 32px rgba(236,72,153,0.4)',
           }}
         >
           Toque para Começar

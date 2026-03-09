@@ -7,15 +7,21 @@ import { STEPS, STEP_LABELS } from '@/store/useOrderStore';
 function StatusBadge({ status }: { status: Order['status'] }) {
   if (status === 'em-atendimento') {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#E8809A]/20 text-[#E8809A] border border-[#E8809A]/30">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#E8809A] animate-pulse" />
+      <span
+        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+        style={{ background: 'rgba(236,72,153,0.15)', color: '#EC4899', border: '1px solid rgba(236,72,153,0.30)' }}
+      >
+        <span className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-pulse" />
         Em atendimento
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-white/5 text-white/50 border border-white/10">
-      <span className="w-1.5 h-1.5 rounded-full bg-white/30" />
+    <span
+      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+      style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.10)' }}
+    >
+      <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.3)' }} />
       Aguardando
     </span>
   );
@@ -50,31 +56,42 @@ function OrderCard({ order, onStart, onComplete }: OrderCardProps) {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -12 }}
-      className={`rounded-2xl border overflow-hidden transition-all
-        ${isActive
-          ? 'bg-[#E8809A]/8 border-[#E8809A]/30'
-          : 'bg-[#161829] border-white/8'
-        }`}
+      className="rounded-2xl border overflow-hidden transition-all"
+      style={
+        isActive
+          ? { background: 'rgba(236,72,153,0.05)', borderColor: 'rgba(236,72,153,0.30)' }
+          : { background: '#161829', borderColor: 'rgba(255,255,255,0.08)' }
+      }
     >
       {/* Card header — click to expand */}
       <button
         onClick={() => setExpanded((v) => !v)}
         className="w-full flex items-center gap-4 px-5 py-4 text-left"
+        style={{ minHeight: 72 }}
       >
         {/* Position number */}
         <div
-          className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold flex-shrink-0
-            ${isActive ? 'bg-[#E8809A]/20 text-[#E8809A]' : 'bg-white/5 text-white/50'}`}
+          className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold flex-shrink-0"
+          style={
+            isActive
+              ? { background: 'rgba(236,72,153,0.20)', color: '#EC4899' }
+              : { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.5)' }
+          }
         >
           {order.queuePosition}
         </div>
 
         {/* Client info */}
         <div className="flex-1 min-w-0">
-          <div className="font-semibold text-white text-base">{order.clientName}</div>
+          <div
+            className="font-semibold text-white text-base"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            {order.clientName}
+          </div>
           <div className="flex items-center gap-2 mt-1 flex-wrap">
             <StatusBadge status={order.status} />
-            {/* Color swatches preview */}
+            {/* Color swatches row */}
             <div className="flex -space-x-1">
               {STEPS.map((step) => {
                 const sel = order.selections[step];
@@ -82,8 +99,8 @@ function OrderCard({ order, onStart, onComplete }: OrderCardProps) {
                 return (
                   <div
                     key={step}
-                    className="w-4 h-4 rounded-full ring-1 ring-[#161829]"
-                    style={{ backgroundColor: sel.colorHex }}
+                    className="w-5 h-5 rounded-full"
+                    style={{ backgroundColor: sel.colorHex, border: '2px solid #161829' }}
                     title={`${STEP_LABELS[step]}: ${sel.colorName}`}
                   />
                 );
@@ -111,7 +128,7 @@ function OrderCard({ order, onStart, onComplete }: OrderCardProps) {
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="border-t border-white/5 mx-5" />
+            <div className="mx-5" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }} />
             <div className="px-5 py-3 space-y-2">
               {STEPS.map((step) => {
                 const sel = order.selections[step];
@@ -119,11 +136,14 @@ function OrderCard({ order, onStart, onComplete }: OrderCardProps) {
                 return (
                   <div key={step} className="flex items-center gap-3">
                     <div
-                      className="w-7 h-7 rounded-full flex-shrink-0 ring-1 ring-white/15"
-                      style={{ backgroundColor: sel.colorHex }}
+                      className="w-7 h-7 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: sel.colorHex, border: '1px solid rgba(255,255,255,0.15)' }}
                     />
                     <div>
-                      <span className="text-xs font-semibold text-[#E8809A]/60 uppercase tracking-wider mr-2">
+                      <span
+                        className="text-xs font-semibold uppercase tracking-wider mr-2"
+                        style={{ color: 'rgba(236,72,153,0.6)' }}
+                      >
                         {STEP_LABELS[step]}
                       </span>
                       <span className="text-sm text-white/80">{sel.productName}</span>
@@ -143,8 +163,8 @@ function OrderCard({ order, onStart, onComplete }: OrderCardProps) {
           <button
             onClick={handleStart}
             disabled={acting}
-            className="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-all
-              bg-white/8 hover:bg-white/14 border border-white/10 disabled:opacity-50"
+            className="btn-gradient w-full font-semibold disabled:opacity-50"
+            style={{ minHeight: 48 }}
           >
             {acting ? 'Iniciando…' : 'Iniciar Atendimento'}
           </button>
@@ -153,9 +173,12 @@ function OrderCard({ order, onStart, onComplete }: OrderCardProps) {
           <button
             onClick={handleComplete}
             disabled={acting}
-            className="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-all
-              bg-[#E8809A] hover:bg-[#E8809A]/90 disabled:opacity-50
-              shadow-lg shadow-[#E8809A]/20"
+            className="w-full rounded-full font-semibold text-red-400 transition-all disabled:opacity-50"
+            style={{
+              minHeight: 48,
+              background: 'transparent',
+              border: '1.5px solid rgba(239,68,68,0.50)',
+            }}
           >
             {acting ? 'Finalizando…' : 'Finalizar Atendimento'}
           </button>
@@ -181,15 +204,30 @@ export function MaquiadorPage() {
   const waitingOrders = orders.filter((o) => o.status === 'aguardando');
 
   return (
-    <div className="min-h-dvh bg-[#080910]">
+    <div className="min-h-dvh" style={{ background: '#080910' }}>
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-[#080910]/90 backdrop-blur-sm border-b border-white/5">
+      <header
+        className="sticky top-0 z-10 border-b"
+        style={{
+          background: 'rgba(8,9,16,0.90)',
+          backdropFilter: 'blur(12px)',
+          borderColor: 'rgba(255,255,255,0.07)',
+        }}
+      >
         <div className="max-w-2xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#E8809A] to-[#17C3B2] flex items-center justify-center">
+            <div
+              className="w-7 h-7 rounded-full flex items-center justify-center"
+              style={{ background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)' }}
+            >
               <span className="text-white text-xs font-bold">M</span>
             </div>
-            <h1 className="font-semibold text-white">Painel do Maquiador</h1>
+            <h1
+              className="font-bold text-white text-lg"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
+              Painel do Maquiador
+            </h1>
           </div>
           <div className="flex items-center gap-2 text-xs text-white/40">
             <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
@@ -200,14 +238,30 @@ export function MaquiadorPage() {
 
       {/* Content */}
       <main className="max-w-2xl mx-auto px-6 py-6 space-y-6">
-        {/* Stats bar */}
+        {/* Stats bar — glassmorphism cards */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-[#161829] border border-white/8 rounded-xl px-4 py-3">
-            <div className="text-2xl font-bold text-[#E8809A]">{waitingOrders.length}</div>
-            <div className="text-xs text-white/40 mt-0.5">Aguardando</div>
+          <div className="glass-card px-4 py-4">
+            <div
+              className="text-3xl font-bold"
+              style={{
+                background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                fontFamily: "'Playfair Display', serif",
+              }}
+            >
+              {waitingOrders.length}
+            </div>
+            <div className="text-xs text-white/40 mt-0.5">Na fila</div>
           </div>
-          <div className="bg-[#161829] border border-white/8 rounded-xl px-4 py-3">
-            <div className="text-2xl font-bold text-white">{activeOrders.length}</div>
+          <div className="glass-card px-4 py-4">
+            <div
+              className="text-3xl font-bold text-white"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
+              {activeOrders.length}
+            </div>
             <div className="text-xs text-white/40 mt-0.5">Em atendimento</div>
           </div>
         </div>
@@ -215,7 +269,10 @@ export function MaquiadorPage() {
         {/* Em atendimento */}
         {activeOrders.length > 0 && (
           <section>
-            <h2 className="text-xs font-semibold text-[#E8809A]/70 uppercase tracking-widest mb-3">
+            <h2
+              className="text-xs font-semibold uppercase tracking-widest mb-3"
+              style={{ color: 'rgba(236,72,153,0.7)' }}
+            >
               Em atendimento
             </h2>
             <div className="space-y-3">
@@ -241,13 +298,19 @@ export function MaquiadorPage() {
 
           {!isLoaded && (
             <div className="text-center py-12">
-              <div className="w-8 h-8 border-2 border-[#E8809A]/30 border-t-[#E8809A] rounded-full animate-spin mx-auto mb-3" />
+              <div
+                className="w-8 h-8 border-2 rounded-full animate-spin mx-auto mb-3"
+                style={{ borderColor: 'rgba(236,72,153,0.30)', borderTopColor: '#EC4899' }}
+              />
               <p className="text-white/40 text-sm">Carregando fila…</p>
             </div>
           )}
 
           {isLoaded && waitingOrders.length === 0 && activeOrders.length === 0 && (
-            <div className="text-center py-16 bg-[#161829] border border-white/5 rounded-2xl">
+            <div
+              className="text-center py-16 rounded-2xl"
+              style={{ background: 'rgba(22,24,41,0.6)', border: '1px solid rgba(255,255,255,0.06)' }}
+            >
               <div className="text-4xl mb-3">✨</div>
               <p className="text-white/60 font-medium">Nenhum cliente na fila</p>
               <p className="text-white/30 text-sm mt-1">Novos pedidos aparecerão aqui em tempo real</p>

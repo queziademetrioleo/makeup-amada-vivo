@@ -209,17 +209,17 @@ export const TryOnCanvas = forwardRef<TryOnCanvasHandle, TryOnCanvasProps>(
           CSS scaleX(-1) = selfie/mirror view.
           Canvas pixels are unmirrored internally; landmarks align 1:1.
         */}
-        {/* WebGL makeup output */}
+        {/* WebGL makeup output — scaleX(-1) = selfie/mirror view */}
         <canvas
           ref={glCanvasRef}
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ transform: 'scaleX(1)' }}
+          style={{ transform: 'scaleX(-1)' }}
         />
         {/* 2D overlay for debug / before-after */}
         <canvas
           ref={overlayRef}
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ transform: 'scaleX(1)' }}
+          style={{ transform: 'scaleX(-1)' }}
         />
 
         <LiveBadge />

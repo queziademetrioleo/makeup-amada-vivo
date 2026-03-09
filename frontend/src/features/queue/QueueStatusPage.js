@@ -9,11 +9,6 @@ const STATUS_LABEL = {
     'em-atendimento': 'É a sua vez! Dirija-se ao maquiador.',
     finalizado: 'Atendimento concluído. Obrigada!',
 };
-const STATUS_COLOR = {
-    aguardando: 'text-white/60',
-    'em-atendimento': 'text-[#E8809A]',
-    finalizado: 'text-green-400',
-};
 export function QueueStatusPage() {
     const { orderId } = useParams();
     const navigate = useNavigate();
@@ -33,15 +28,47 @@ export function QueueStatusPage() {
     const status = order?.status ?? 'aguardando';
     const position = order?.queuePosition ?? null;
     const orderSelections = order?.selections ?? selections;
-    return (_jsxs("div", { className: "min-h-dvh bg-[#080910] flex flex-col", children: [_jsxs("div", { className: "h-14 flex items-center justify-between px-6 border-b border-white/5 flex-shrink-0", children: [_jsxs("div", { className: "flex items-center gap-2", children: [_jsx("div", { className: "w-6 h-6 rounded-full bg-gradient-to-br from-[#E8809A] to-[#17C3B2] flex items-center justify-center", children: _jsx("span", { className: "text-white text-xs font-bold", children: "M" }) }), _jsx("span", { className: "text-sm font-medium text-white/70", children: "Farm\u00E1cia Make Up" })] }), status === 'finalizado' && (_jsx("button", { onClick: () => navigate('/'), className: "text-xs text-white/40 hover:text-white/60 transition-colors", children: "Voltar ao in\u00EDcio" }))] }), _jsx("div", { className: "flex-1 flex flex-col items-center justify-center p-6", children: _jsx("div", { className: "w-full max-w-md", children: _jsxs(motion.div, { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, className: "space-y-5", children: [_jsx(AnimatePresence, { mode: "wait", children: _jsxs(motion.div, { initial: { opacity: 0, scale: 0.95 }, animate: { opacity: 1, scale: 1 }, exit: { opacity: 0, scale: 0.95 }, className: `rounded-2xl border p-6 text-center
-                  ${status === 'em-atendimento'
-                                        ? 'bg-[#E8809A]/10 border-[#E8809A]/30'
+    return (_jsxs("div", { className: "min-h-dvh flex flex-col", style: { background: '#080910' }, children: [_jsxs("div", { className: "h-14 flex items-center justify-between px-6 flex-shrink-0 border-b", style: { borderColor: 'rgba(255,255,255,0.07)' }, children: [_jsxs("div", { className: "flex items-center gap-2", children: [_jsx("div", { className: "w-6 h-6 rounded-full flex items-center justify-center", style: { background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)' }, children: _jsx("span", { className: "text-white text-xs font-bold", children: "M" }) }), _jsx("span", { className: "text-sm font-medium text-white/70", children: "Farm\u00E1cia Make Up" })] }), status === 'finalizado' && (_jsx("button", { onClick: () => navigate('/'), className: "text-xs text-white/40 hover:text-white/60 transition-colors", style: { minHeight: 44 }, children: "Voltar ao in\u00EDcio" }))] }), _jsx("div", { className: "flex-1 flex flex-col items-center justify-center p-6", children: _jsx("div", { className: "w-full max-w-md", children: _jsxs(motion.div, { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, className: "space-y-5", children: [_jsx(AnimatePresence, { mode: "wait", children: _jsxs(motion.div, { initial: { opacity: 0, scale: 0.95 }, animate: { opacity: 1, scale: 1 }, exit: { opacity: 0, scale: 0.95 }, className: "rounded-2xl p-6 text-center", style: status === 'em-atendimento'
+                                        ? {
+                                            background: 'rgba(236,72,153,0.08)',
+                                            border: '1px solid rgba(236,72,153,0.35)',
+                                            /* animated gradient border via box-shadow approximation */
+                                            animation: 'glowPulse 2s ease-in-out infinite',
+                                        }
                                         : status === 'finalizado'
-                                            ? 'bg-green-500/10 border-green-500/20'
-                                            : 'bg-[#161829] border-white/8'}`, children: [status === 'em-atendimento' && (_jsx("div", { className: "flex items-center justify-center mb-3", children: _jsxs("span", { className: "relative flex h-4 w-4", children: [_jsx("span", { className: "animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E8809A] opacity-75" }), _jsx("span", { className: "relative inline-flex rounded-full h-4 w-4 bg-[#E8809A]" })] }) })), status === 'aguardando' && position !== null && (_jsxs("div", { className: "mb-3", children: [_jsx("div", { className: "text-5xl font-bold text-white mb-1", children: position }), _jsx("div", { className: "text-xs text-white/40 uppercase tracking-widest", children: "Posi\u00E7\u00E3o na fila" })] })), _jsxs("h2", { className: "text-lg font-semibold text-white mb-1", children: [displayName && `${displayName}, `, status === 'aguardando' ? 'você está na fila!' : '', status === 'em-atendimento' ? 'chegou a sua hora!' : '', status === 'finalizado' ? 'obrigada pela visita!' : ''] }), _jsx("p", { className: `text-sm font-medium ${STATUS_COLOR[status]}`, children: STATUS_LABEL[status] })] }, status) }), _jsxs("div", { className: "bg-[#161829] border border-white/8 rounded-2xl overflow-hidden", children: [_jsx("div", { className: "px-5 py-3 border-b border-white/5", children: _jsx("h3", { className: "text-xs font-semibold text-white/40 uppercase tracking-widest", children: "Suas escolhas" }) }), STEPS.map((step) => {
+                                            ? { background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }
+                                            : { background: 'rgba(22,24,41,0.8)', border: '1px solid rgba(255,255,255,0.08)' }, children: [status === 'em-atendimento' && (_jsx("div", { className: "flex items-center justify-center mb-3", children: _jsxs("span", { className: "relative flex h-4 w-4", children: [_jsx("span", { className: "animate-ping absolute inline-flex h-full w-full rounded-full opacity-75", style: { background: '#EC4899' } }), _jsx("span", { className: "relative inline-flex rounded-full h-4 w-4", style: { background: '#EC4899' } })] }) })), status === 'aguardando' && position !== null && (_jsxs("div", { className: "mb-3", children: [_jsx("div", { className: "font-bold mb-1 leading-none", style: {
+                                                        fontFamily: "'Playfair Display', serif",
+                                                        fontSize: '6rem',
+                                                        background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)',
+                                                        WebkitBackgroundClip: 'text',
+                                                        WebkitTextFillColor: 'transparent',
+                                                        backgroundClip: 'text',
+                                                    }, children: position }), _jsx("div", { className: "text-xs text-white/40 uppercase tracking-widest", children: "Posi\u00E7\u00E3o na fila" })] })), status === 'em-atendimento' && (_jsx("div", { className: "text-3xl font-bold mb-2", style: {
+                                                fontFamily: "'Playfair Display', serif",
+                                                background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)',
+                                                WebkitBackgroundClip: 'text',
+                                                WebkitTextFillColor: 'transparent',
+                                                backgroundClip: 'text',
+                                            }, children: "\u00C9 a sua vez!" })), _jsxs("h2", { className: "text-lg font-semibold text-white mb-1", children: [displayName && `${displayName}, `, status === 'aguardando' ? 'você está na fila!' : '', status === 'em-atendimento' ? 'chegou a sua hora!' : '', status === 'finalizado' ? 'obrigada pela visita!' : ''] }), _jsx("p", { className: "text-sm font-medium", style: {
+                                                color: status === 'em-atendimento'
+                                                    ? '#EC4899'
+                                                    : status === 'finalizado'
+                                                        ? '#4ade80'
+                                                        : 'rgba(255,255,255,0.6)',
+                                            }, children: STATUS_LABEL[status] })] }, status) }), _jsxs("div", { className: "rounded-2xl overflow-hidden", style: { background: '#161829', border: '1px solid rgba(255,255,255,0.08)' }, children: [_jsx("div", { className: "px-5 py-3 border-b", style: { borderColor: 'rgba(255,255,255,0.06)' }, children: _jsx("h3", { className: "text-xs font-semibold text-white/40 uppercase tracking-widest", children: "Suas escolhas" }) }), STEPS.map((step) => {
                                         const sel = orderSelections[step];
                                         if (!sel)
                                             return null;
-                                        return (_jsxs("div", { className: "flex items-center gap-3 px-5 py-3 border-b border-white/5 last:border-0", children: [_jsx("div", { className: "w-7 h-7 rounded-full flex-shrink-0 ring-1 ring-white/15 shadow-sm", style: { backgroundColor: sel.colorHex } }), _jsxs("div", { className: "flex-1 min-w-0", children: [_jsx("span", { className: "text-xs font-semibold text-[#E8809A]/70 uppercase tracking-wider mr-2", children: STEP_LABELS[step] }), _jsx("span", { className: "text-sm text-white/70", children: sel.colorName })] })] }, step));
-                                    })] }), _jsxs("p", { className: "text-center text-xs text-white/20", children: ["Pedido #", orderId.slice(0, 8).toUpperCase()] })] }) }) })] }));
+                                        return (_jsxs("div", { className: "flex items-center gap-3 px-5 py-3 border-b last:border-0", style: { borderColor: 'rgba(255,255,255,0.06)' }, children: [_jsx("div", { className: "w-8 h-8 rounded-full flex-shrink-0 shadow-sm", style: {
+                                                        backgroundColor: sel.colorHex,
+                                                        outline: '2px solid rgba(255,255,255,0.15)',
+                                                        outlineOffset: 1,
+                                                    } }), _jsxs("div", { className: "flex-1 min-w-0", children: [_jsx("span", { className: "text-xs font-semibold uppercase tracking-wider mr-2", style: { color: 'rgba(236,72,153,0.7)' }, children: STEP_LABELS[step] }), _jsx("span", { className: "text-sm text-white/70", children: sel.colorName })] })] }, step));
+                                    })] }), _jsxs("p", { className: "text-center text-xs text-white/20", children: ["Pedido #", orderId.slice(0, 8).toUpperCase()] })] }) }) }), _jsx("style", { children: `
+        @keyframes glowPulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(236,72,153,0.0); }
+          50% { box-shadow: 0 0 24px 4px rgba(236,72,153,0.30); }
+        }
+      ` })] }));
 }

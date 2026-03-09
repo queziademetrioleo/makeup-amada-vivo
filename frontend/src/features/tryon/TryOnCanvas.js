@@ -166,6 +166,6 @@ export const TryOnCanvas = forwardRef(({ videoRef, faceLandmarkerRef, config, sh
             rendererRef.current = null;
         };
     }, [renderFrame]);
-    return (_jsxs("div", { className: "relative w-full h-full flex items-center justify-center bg-black rounded-2xl overflow-hidden", children: [_jsx("canvas", { ref: glCanvasRef, className: "absolute inset-0 w-full h-full object-cover", style: { transform: 'scaleX(1)' } }), _jsx("canvas", { ref: overlayRef, className: "absolute inset-0 w-full h-full object-cover", style: { transform: 'scaleX(1)' } }), _jsx(LiveBadge, {}), _jsx(AnimatePresence, { children: !faceMeshReady && _jsx(FaceMeshLoadingOverlay, { isReady: faceMeshReady }) }), faceMeshReady && !faceDetected && _jsx(NoFaceIndicator, {})] }));
+    return (_jsxs("div", { className: "relative w-full h-full flex items-center justify-center bg-black rounded-2xl overflow-hidden", children: [_jsx("canvas", { ref: glCanvasRef, className: "absolute inset-0 w-full h-full object-cover", style: { transform: 'scaleX(-1)' } }), _jsx("canvas", { ref: overlayRef, className: "absolute inset-0 w-full h-full object-cover", style: { transform: 'scaleX(-1)' } }), _jsx(LiveBadge, {}), _jsx(AnimatePresence, { children: !faceMeshReady && _jsx(FaceMeshLoadingOverlay, { isReady: faceMeshReady }) }), faceMeshReady && !faceDetected && _jsx(NoFaceIndicator, {})] }));
 });
 TryOnCanvas.displayName = 'TryOnCanvas';
