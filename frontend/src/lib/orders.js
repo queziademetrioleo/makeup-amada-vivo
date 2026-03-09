@@ -6,7 +6,8 @@ async function postWebhookRecibo(payload) {
     try {
         await fetch(WEBHOOK_RECIBO, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify(payload),
         });
     }
@@ -18,7 +19,8 @@ async function postWebhookMaquiador(payload) {
     try {
         await fetch(WEBHOOK_MAQUIADOR, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify(payload),
         });
     }
