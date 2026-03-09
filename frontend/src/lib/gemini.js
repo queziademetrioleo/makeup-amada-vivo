@@ -53,7 +53,17 @@ export async function analyzeWithGemini(photoBase64) {
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!text)
         throw new Error('Empty response from Gemini');
-    // Parse JSON (Gemini should return pure JSON due to responseMimeType)
-    const parsed = JSON.parse(text);
-    return parsed;
+    // Clean text: remove markdown code block backticks if present
+    let cleanText = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+    // Sometimes the model forgets double quotes around property names in the output.
+    // This regex wraps unquoted keys with double quotes to make it valid JSON.
+    cleanText = cleanText.replace(/([{,]\s*)([a-zA-Z0-9_]+)\s*:/g, '$1"$2":');
+    try {
+        const parsed = JSON.parse(cleanText);
+        return parsed;
+    }
+    catch (e) {
+        console.error('Failed to parse Gemini response:', cleanText);
+        throw new Error(`Erro ao interpretar a resposta da IA: ${e.message}`);
+    }
 }
