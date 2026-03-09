@@ -1,0 +1,5 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+export function Slider({ label, value, min = 0, max = 1, step = 0.01, onChange, disabled }) {
+    const pct = ((value - min) / (max - min)) * 100;
+    return (_jsxs("div", { className: `space-y-1.5 ${disabled ? 'opacity-40 pointer-events-none' : ''}`, children: [_jsxs("div", { className: "flex justify-between items-center", children: [_jsx("span", { className: "text-xs text-white/50 font-medium uppercase tracking-wider", children: label }), _jsxs("span", { className: "text-xs text-white/60 font-mono", children: [Math.round(pct), "%"] })] }), _jsxs("div", { className: "relative h-1.5 bg-border rounded-full", children: [_jsx("div", { className: "absolute inset-y-0 left-0 bg-gradient-brand rounded-full", style: { width: `${pct}%` } }), _jsx("input", { type: "range", min: min, max: max, step: step, value: value, onChange: (e) => onChange(parseFloat(e.target.value)), className: "absolute inset-0 w-full opacity-0 cursor-pointer h-full", style: { margin: 0 } })] })] }));
+}

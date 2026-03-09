@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users can only read/write their own looks
+    match /looks/{lookId} {
+      allow read, write: if request.auth != null
+        && request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null
+        && request.auth.uid == request.resource.data.userId;
+    }
+
+    // Presets are public read, admin-only write
+    match /presets/{presetId} {
+      allow read: if true;
+      allow write: if false; // managed via Functions
+    }
+
+    // Orders are public read/write for demo (no auth required)
+    match /orders/{orderId} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if true;
+    }
+  }
+}
