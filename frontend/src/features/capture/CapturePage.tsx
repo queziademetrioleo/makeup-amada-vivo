@@ -130,6 +130,7 @@ export function CapturePage() {
 
             setResult(
                 { tom: geminiResult.analise_pele.tom, subtom: geminiResult.analise_pele.subtom },
+                geminiResult.resumo,
                 { base, batom, blush },
             );
 

@@ -11,6 +11,7 @@ export interface GeminiResponse {
         tom: string;
         subtom: string;
     };
+    resumo: string;
     recomendacoes: {
         base: { id: string; nome: string };
         batom: { id: string; nome: string };
@@ -63,6 +64,7 @@ export async function analyzeWithGemini(photoBase64: string): Promise<GeminiResp
                         },
                         required: ['tom', 'subtom']
                     },
+                    resumo: { type: 'STRING' },
                     recomendacoes: {
                         type: 'OBJECT',
                         properties: {
@@ -73,7 +75,7 @@ export async function analyzeWithGemini(photoBase64: string): Promise<GeminiResp
                         required: ['base', 'batom', 'blush']
                     }
                 },
-                required: ['analise_pele', 'recomendacoes']
+                required: ['analise_pele', 'resumo', 'recomendacoes']
             }
         },
     };

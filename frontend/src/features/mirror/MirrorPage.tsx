@@ -15,6 +15,7 @@ export function MirrorPage() {
     const {
         recommendations,
         analysis,
+        resumo,
         activeBase,
         activeBatom,
         activeBlush,
@@ -43,18 +44,18 @@ export function MirrorPage() {
             lipstick: {
                 enabled: !!activeBatom,
                 color: activeBatom?.hex ?? '#C44040',
-                opacity: 0.55,
+                opacity: 0.75,
                 glossy: false,
             },
             foundation: {
                 enabled: !!activeBase,
                 color: activeBase?.hex ?? '#D4A574',
-                opacity: 0.25,
+                opacity: 0.60,
             },
             blush: {
                 enabled: !!activeBlush,
                 color: activeBlush?.hex ?? '#E0788A',
-                opacity: 0.35,
+                opacity: 0.65,
             },
             contour: { enabled: false, color: '#8B6540', opacity: 0 },
             brows: { enabled: false, color: '#4A3728', opacity: 0 },
@@ -228,6 +229,22 @@ export function MirrorPage() {
                     </div>
                 </div>
 
+                {/* Resumo da IA */}
+                {resumo && (
+                    <div className="absolute top-20 left-0 right-0 px-4 flex justify-center z-10">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.5 }}
+                            className="bg-black/60 backdrop-blur-md px-5 py-3 rounded-2xl max-w-sm text-center shadow-lg border border-white/10"
+                        >
+                            <p className="text-white/90 text-sm leading-relaxed whitespace-pre-line">
+                                ✨ {resumo}
+                            </p>
+                        </motion.div>
+                    </div>
+                )}
+
                 {/* Loading overlay */}
                 {!ready && (
                     <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center gap-4 z-20">
@@ -310,6 +327,16 @@ export function MirrorPage() {
                             </motion.button>
                         );
                     })}
+                </div>
+
+                <div className="px-6 pt-2 pb-4">
+                    <button
+                        onClick={() => navigate('/recibo')}
+                        className="w-full py-4 rounded-full text-white font-semibold text-lg"
+                        style={{ background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)', boxShadow: '0 0 20px rgba(236,72,153,0.3)' }}
+                    >
+                        Concluir e Ver Recibo
+                    </button>
                 </div>
             </div>
         </div>

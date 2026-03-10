@@ -37,6 +37,29 @@ export async function analyzeWithGemini(photoBase64) {
             temperature: 0.2,
             maxOutputTokens: 1024,
             responseMimeType: 'application/json',
+            responseSchema: {
+                type: 'OBJECT',
+                properties: {
+                    analise_pele: {
+                        type: 'OBJECT',
+                        properties: {
+                            tom: { type: 'STRING' },
+                            subtom: { type: 'STRING' }
+                        },
+                        required: ['tom', 'subtom']
+                    },
+                    recomendacoes: {
+                        type: 'OBJECT',
+                        properties: {
+                            base: { type: 'OBJECT', properties: { id: { type: 'STRING' }, nome: { type: 'STRING' } }, required: ['id', 'nome'] },
+                            batom: { type: 'OBJECT', properties: { id: { type: 'STRING' }, nome: { type: 'STRING' } }, required: ['id', 'nome'] },
+                            blush: { type: 'OBJECT', properties: { id: { type: 'STRING' }, nome: { type: 'STRING' } }, required: ['id', 'nome'] }
+                        },
+                        required: ['base', 'batom', 'blush']
+                    }
+                },
+                required: ['analise_pele', 'recomendacoes']
+            }
         },
     };
     const res = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
@@ -53,11 +76,13 @@ export async function analyzeWithGemini(photoBase64) {
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!text)
         throw new Error('Empty response from Gemini');
-    // Clean text: remove markdown code block backticks if present
-    let cleanText = text.replace(/```json/gi, '').replace(/```/g, '').trim();
-    // Sometimes the model forgets double quotes around property names in the output.
-    // This regex wraps unquoted keys with double quotes to make it valid JSON.
-    cleanText = cleanText.replace(/([{,]\s*)([a-zA-Z0-9_]+)\s*:/g, '$1"$2":');
+    // Extract JSON object bounded by brackets in case there's markdown text
+    let cleanText = text.trim();
+    const firstBrace = cleanText.indexOf('{');
+    const lastBrace = cleanText.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1) {
+        cleanText = cleanText.substring(firstBrace, lastBrace + 1);
+    }
     try {
         const parsed = JSON.parse(cleanText);
         return parsed;

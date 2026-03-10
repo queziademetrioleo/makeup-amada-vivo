@@ -72,7 +72,7 @@ Objetivos:
 
 7. A saída deve ser obrigatoriamente em JSON.
 
-8. Não explique o raciocínio.
+8. Inclua um atributo "resumo" com uma curta e amigável frase (em português) elogiando os traços do usuário e justificando rapidamente a escolha das cores.
 
 9. Não escreva nenhum texto fora do JSON.
 
@@ -107,6 +107,7 @@ Formato obrigatório da resposta. VOCÊ DEVE RETORNAR APENAS O JSON PURO. NÃO E
     "tom": "STRING",
     "subtom": "STRING"
   },
+  "resumo": "STRING",
   "recomendacoes": {
     "base": { "id": "STRING", "nome": "STRING" },
     "batom": { "id": "STRING", "nome": "STRING" },
